@@ -1,28 +1,20 @@
-export type Expense = {
-  id: string
-  amount: number
-  category: string
-  description: string
-  date: Date
-}
+export type JobStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+export type ProcessingStage = 'TRANSFORM' | 'ANIMATE' | 'FORMAT' | 'COMPLETED';
 
-export type ExpenseFormData = Omit<Expense, 'id' | 'date'> & {
-  date: string
-}
-
-export const EXPENSE_CATEGORIES = [
-  'Food',
-  'Transportation',
-  'Housing',
-  'Utilities',
-  'Entertainment',
-  'Healthcare',
-  'Shopping',
-  'Education',
-  'Other'
-] as const
-
-export type DateRange = {
-  from: Date | undefined
-  to: Date | undefined
+export interface ContentJob {
+  id: string;
+  userId: string;
+  status: JobStatus;
+  originalImageUrl: string;
+  imagePrompt?: string | null;
+  videoPrompt?: string | null;
+  transformedImageUrl?: string | null;
+  animatedVideoUrl?: string | null;
+  finalVideoUrl?: string | null;
+  progress: number;
+  currentStage: ProcessingStage;
+  errorMessage?: string | null;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  completedAt?: Date | string | null;
 }

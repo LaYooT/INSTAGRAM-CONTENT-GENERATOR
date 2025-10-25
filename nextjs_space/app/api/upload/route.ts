@@ -3,28 +3,45 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { uploadFile } from "@/lib/s3";
+import { uploadFile, downloadFile } from "@/lib/s3";
+import {
+  generateTransformedImage,
+  generateAnimatedVideo,
+  formatForInstagram,
+} from "@/lib/media-generator";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const formData = await request.formData();
     const file = formData.get("file") as File;
+    const imagePrompt = formData.get("imagePrompt") as string;
+    const videoPrompt = formData.get("videoPrompt") as string;
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
+    if (!imagePrompt || !videoPrompt) {
+      return NextResponse.json(
+        { error: "Image and video prompts are required" },
+        { status: 400 }
+      );
+    }
+
     // Validate file type
-    if (!file.type.startsWith('image/')) {
-      return NextResponse.json({ error: "File must be an image" }, { status: 400 });
+    if (!file.type.startsWith("image/")) {
+      return NextResponse.json(
+        { error: "File must be an image" },
+        { status: 400 }
+      );
     }
 
     // Validate file size (10MB)
@@ -41,91 +58,120 @@ export async function POST(request: NextRequest) {
       data: {
         userId: session.user.id,
         originalImageUrl: cloudStoragePath,
-        status: 'PENDING',
+        imagePrompt: imagePrompt,
+        videoPrompt: videoPrompt,
+        status: "PENDING",
         progress: 0,
-        currentStage: 'TRANSFORM'
-      }
+        currentStage: "TRANSFORM",
+      },
     });
 
-    // Start processing (in a real app, this would be queued)
-    // For demo purposes, we'll simulate the processing
-    processJobAsync(job.id);
+    // Start processing asynchronously
+    processJobAsync(job.id, cloudStoragePath, imagePrompt, videoPrompt);
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       jobId: job.id,
-      message: "File uploaded successfully" 
+      message: "File uploaded successfully",
     });
-
   } catch (error) {
-    console.error('Upload error:', error);
+    console.error("Upload error:", error);
     return NextResponse.json(
-      { error: "Failed to upload file" }, 
+      { error: "Failed to upload file" },
       { status: 500 }
     );
   }
 }
 
-// Simulate AI processing pipeline
-async function processJobAsync(jobId: string) {
+async function processJobAsync(
+  jobId: string,
+  originalImageUrl: string,
+  imagePrompt: string,
+  videoPrompt: string
+) {
   try {
-    // Stage 1: Transform (simulate AI image transformation)
-    await updateJob(jobId, 'PROCESSING', 10, 'TRANSFORM');
-    await delay(5000); // Simulate processing time
-    
-    await updateJob(jobId, 'PROCESSING', 40, 'TRANSFORM');
-    await delay(3000);
+    // Stage 1: Transform Image with AI
+    await updateJob(jobId, "PROCESSING", 10, "TRANSFORM");
 
-    // Stage 2: Animate (simulate video generation)
-    await updateJob(jobId, 'PROCESSING', 50, 'ANIMATE');
-    await delay(8000);
-    
-    await updateJob(jobId, 'PROCESSING', 80, 'ANIMATE');
-    await delay(5000);
-
-    // Stage 3: Format (simulate Instagram optimization)
-    await updateJob(jobId, 'PROCESSING', 90, 'FORMAT');
-    await delay(3000);
-
-    // Complete (in a real app, this would have actual video URLs)
-    await updateJob(jobId, 'COMPLETED', 100, 'COMPLETED', {
-      transformedImageUrl: 'demo-transformed-image.jpg',
-      animatedVideoUrl: 'demo-animated-video.mp4',
-      finalVideoUrl: 'https://sample-videos.com/zip/10/mp4/SampleVideo_1080x1920_30fps_2MB.mp4' // Demo video
+    console.log(`[Job ${jobId}] Starting image transformation...`);
+    const transformedImageUrl = await generateTransformedImage({
+      sourceImageUrl: originalImageUrl,
+      prompt: imagePrompt,
     });
 
+    await updateJob(jobId, "PROCESSING", 40, "TRANSFORM", {
+      transformedImageUrl,
+    });
+
+    // Stage 2: Animate - Generate Video from Image
+    await updateJob(jobId, "PROCESSING", 50, "ANIMATE");
+
+    console.log(`[Job ${jobId}] Starting video animation...`);
+    const animatedVideoUrl = await generateAnimatedVideo({
+      imageUrl: transformedImageUrl,
+      prompt: videoPrompt,
+      duration: 15,
+    });
+
+    await updateJob(jobId, "PROCESSING", 80, "ANIMATE", {
+      animatedVideoUrl,
+    });
+
+    // Stage 3: Format for Instagram Reels
+    await updateJob(jobId, "PROCESSING", 90, "FORMAT");
+
+    console.log(`[Job ${jobId}] Formatting for Instagram...`);
+    const finalVideoUrl = await formatForInstagram(animatedVideoUrl);
+
+    await updateJob(jobId, "PROCESSING", 95, "FORMAT");
+
+    // Complete
+    await updateJob(jobId, "COMPLETED", 100, "COMPLETED", {
+      finalVideoUrl,
+    });
+
+    console.log(`[Job ${jobId}] Processing completed successfully!`);
   } catch (error) {
-    console.error('Processing error:', error);
-    await updateJob(jobId, 'FAILED', 0, 'TRANSFORM', {}, 'Processing failed');
+    console.error(`[Job ${jobId}] Processing error:`, error);
+    await updateJob(
+      jobId,
+      "FAILED",
+      0,
+      "TRANSFORM",
+      {},
+      error instanceof Error ? error.message : "Processing failed"
+    );
   }
 }
 
 async function updateJob(
-  jobId: string, 
-  status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED',
+  jobId: string,
+  status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED",
   progress: number,
-  currentStage: 'TRANSFORM' | 'ANIMATE' | 'FORMAT' | 'COMPLETED',
-  urls: any = {},
+  currentStage: "TRANSFORM" | "ANIMATE" | "FORMAT" | "COMPLETED",
+  urls: {
+    transformedImageUrl?: string;
+    animatedVideoUrl?: string;
+    finalVideoUrl?: string;
+  } = {},
   errorMessage?: string
 ) {
   const updateData: any = {
     status,
     progress,
     currentStage,
-    updatedAt: new Date()
+    updatedAt: new Date(),
   };
 
-  if (urls.transformedImageUrl) updateData.transformedImageUrl = urls.transformedImageUrl;
-  if (urls.animatedVideoUrl) updateData.animatedVideoUrl = urls.animatedVideoUrl;
+  if (urls.transformedImageUrl)
+    updateData.transformedImageUrl = urls.transformedImageUrl;
+  if (urls.animatedVideoUrl)
+    updateData.animatedVideoUrl = urls.animatedVideoUrl;
   if (urls.finalVideoUrl) updateData.finalVideoUrl = urls.finalVideoUrl;
   if (errorMessage) updateData.errorMessage = errorMessage;
-  if (status === 'COMPLETED') updateData.completedAt = new Date();
+  if (status === "COMPLETED") updateData.completedAt = new Date();
 
   await prisma.contentJob.update({
     where: { id: jobId },
-    data: updateData
+    data: updateData,
   });
-}
-
-function delay(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
 }

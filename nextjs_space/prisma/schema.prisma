@@ -68,6 +68,8 @@ model ContentJob {
   userId            String
   status            JobStatus   @default(PENDING)
   originalImageUrl  String
+  imagePrompt       String?     // Prompt for image transformation
+  videoPrompt       String?     // Prompt for video animation
   transformedImageUrl String?
   animatedVideoUrl  String?
   finalVideoUrl     String?
