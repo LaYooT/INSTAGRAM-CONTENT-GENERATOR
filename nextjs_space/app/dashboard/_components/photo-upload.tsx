@@ -127,15 +127,18 @@ export function PhotoUpload({ onJobCreated, disabled }: PhotoUploadProps) {
     <>
       <div className="space-y-4">
         {preview ? (
-          <div className="relative aspect-square max-w-sm mx-auto rounded-lg overflow-hidden border-2 border-purple-500/50">
+          <div className="relative aspect-square max-w-sm mx-auto rounded-2xl overflow-hidden border-2 border-primary/50 shadow-lg shadow-primary/20">
             <img
               src={preview}
               alt="Preview"
               className="w-full h-full object-cover"
             />
             {uploading && (
-              <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                <Loader2 className="w-12 h-12 text-white animate-spin" />
+              <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+                <div className="text-center">
+                  <Loader2 className="w-12 h-12 text-primary mx-auto mb-4 animate-spin" />
+                  <p className="text-sm text-muted-foreground">Uploading...</p>
+                </div>
               </div>
             )}
           </div>
@@ -143,17 +146,32 @@ export function PhotoUpload({ onJobCreated, disabled }: PhotoUploadProps) {
           <div
             onDrop={handleDrop}
             onDragOver={handleDragOver}
-            className="border-2 border-dashed border-white/20 rounded-lg p-12 text-center hover:border-purple-500/50 transition-colors cursor-pointer"
+            className="group relative border-2 border-dashed border-border rounded-2xl p-12 text-center 
+                     hover:border-primary/50 hover:bg-primary/5 
+                     transition-smooth cursor-pointer
+                     focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2"
             onClick={() => !disabled && fileInputRef.current?.click()}
+            role="button"
+            tabIndex={0}
+            aria-label="Upload photo"
           >
-            <ImageIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <p className="text-white font-medium mb-2">
-              Glissez-déposez votre photo ici
-            </p>
-            <p className="text-gray-400 text-sm mb-4">ou cliquez pour parcourir</p>
-            <p className="text-gray-500 text-xs">
-              PNG, JPG, WEBP jusqu'à 10MB
-            </p>
+            <div className="transition-smooth group-hover:scale-105">
+              <div className="w-20 h-20 mx-auto mb-4 bg-muted rounded-2xl flex items-center justify-center group-hover:bg-primary/20 transition-smooth">
+                <ImageIcon className="w-10 h-10 text-muted-foreground group-hover:text-primary transition-smooth" />
+              </div>
+              <p className="text-foreground font-semibold mb-2">
+                Drag & drop your photo here
+              </p>
+              <p className="text-muted-foreground text-sm mb-4">or click to browse</p>
+              <div className="flex items-center justify-center gap-2">
+                <span className="px-3 py-1 bg-muted rounded-full text-xs text-muted-foreground">PNG</span>
+                <span className="px-3 py-1 bg-muted rounded-full text-xs text-muted-foreground">JPG</span>
+                <span className="px-3 py-1 bg-muted rounded-full text-xs text-muted-foreground">WEBP</span>
+              </div>
+              <p className="text-muted-foreground text-xs mt-2">
+                Max 10MB
+              </p>
+            </div>
           </div>
         )}
 
@@ -164,10 +182,11 @@ export function PhotoUpload({ onJobCreated, disabled }: PhotoUploadProps) {
           onChange={handleFileSelect}
           className="hidden"
           disabled={disabled || uploading}
+          aria-label="File input"
         />
 
         {preview && !uploading && (
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <Button
               variant="outline"
               onClick={() => {
@@ -178,17 +197,17 @@ export function PhotoUpload({ onJobCreated, disabled }: PhotoUploadProps) {
                   fileInputRef.current.value = "";
                 }
               }}
-              className="flex-1 border-white/10 text-gray-300 hover:text-white"
+              className="flex-1 hover-scale"
             >
-              Annuler
+              Cancel
             </Button>
             <Button
               onClick={() => setShowImagePrompt(true)}
               disabled={disabled}
-              className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+              className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground hover-scale shadow-lg shadow-primary/20"
             >
               <Upload className="w-4 h-4 mr-2" />
-              Modifier les prompts
+              Edit Prompts
             </Button>
           </div>
         )}
@@ -197,9 +216,9 @@ export function PhotoUpload({ onJobCreated, disabled }: PhotoUploadProps) {
       <PromptDialog
         open={showImagePrompt}
         onOpenChange={setShowImagePrompt}
-        title="🎨 Décrivez la transformation souhaitée"
-        description="Comment voulez-vous transformer votre image ? Soyez créatif !"
-        placeholder="Exemple : Transformez cette photo en style cartoon coloré avec des effets néon, ambiance cyberpunk futuriste, couleurs vibrantes rose et bleu, haute qualité 8k..."
+        title="🎨 Describe the Image Transformation"
+        description="How do you want to transform your image? Be creative!"
+        placeholder="Example: Transform this photo into colorful cartoon style with neon effects, cyberpunk futuristic vibe, vibrant pink and blue colors, 8k high quality..."
         type="image"
         onSubmit={handleImagePromptSubmit}
       />
@@ -207,9 +226,9 @@ export function PhotoUpload({ onJobCreated, disabled }: PhotoUploadProps) {
       <PromptDialog
         open={showVideoPrompt}
         onOpenChange={setShowVideoPrompt}
-        title="🎬 Décrivez l'animation vidéo"
-        description="Comment voulez-vous animer cette image en vidéo ?"
-        placeholder="Exemple : Créez une animation dynamique avec zoom progressif, rotation fluide, particules brillantes qui flottent, transitions cinématiques, mouvement de caméra dramatique, durée 15 secondes..."
+        title="🎬 Describe the Video Animation"
+        description="How do you want to animate this image into a video?"
+        placeholder="Example: Create dynamic animation with progressive zoom, smooth rotation, floating sparkle particles, cinematic transitions, dramatic camera movement, 15 second duration..."
         type="video"
         onSubmit={handleVideoPromptSubmit}
       />

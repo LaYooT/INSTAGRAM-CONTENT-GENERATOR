@@ -33,21 +33,24 @@ const stages = [
     label: 'Transform', 
     icon: Sparkles, 
     description: 'AI is enhancing your image...',
-    color: 'text-purple-400'
+    color: 'text-primary',
+    bgColor: 'bg-primary/20'
   },
   { 
     key: 'ANIMATE' as const, 
     label: 'Animate', 
     icon: Play, 
     description: 'Creating video animation...',
-    color: 'text-pink-400'
+    color: 'text-secondary',
+    bgColor: 'bg-secondary/20'
   },
   { 
     key: 'FORMAT' as const, 
     label: 'Format', 
     icon: Settings, 
     description: 'Optimizing for Instagram...',
-    color: 'text-blue-400'
+    color: 'text-blue-400',
+    bgColor: 'bg-blue-400/20'
   },
 ];
 
@@ -90,17 +93,17 @@ export function ProcessingStatus({ jobId, onComplete }: ProcessingStatusProps) {
   if (loading || !jobStatus) {
     return (
       <div className="text-center py-8">
-        <Loader2 className="w-8 h-8 text-purple-400 mx-auto animate-spin mb-4" />
-        <p className="text-gray-300">Loading status...</p>
+        <Loader2 className="w-8 h-8 text-primary mx-auto animate-spin mb-4" />
+        <p className="text-muted-foreground">Loading status...</p>
       </div>
     );
   }
 
   if (jobStatus.status === 'FAILED') {
     return (
-      <Alert className="border-red-500/50 bg-red-500/10">
-        <XCircle className="h-4 w-4 text-red-400" />
-        <AlertDescription className="text-red-400">
+      <Alert className="border-destructive/50 bg-destructive/10">
+        <XCircle className="h-4 w-4 text-destructive" />
+        <AlertDescription className="text-destructive">
           Processing failed: {jobStatus.errorMessage || 'Unknown error occurred'}
         </AlertDescription>
       </Alert>
@@ -112,24 +115,24 @@ export function ProcessingStatus({ jobId, onComplete }: ProcessingStatusProps) {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h3 className="text-xl font-semibold text-white mb-2">Processing Your Content</h3>
-        <p className="text-gray-400">This usually takes 30-60 seconds</p>
+        <h3 className="text-xl font-semibold text-foreground mb-2">Processing Your Content</h3>
+        <p className="text-muted-foreground">This usually takes 30-60 seconds</p>
       </div>
 
       {/* Overall Progress */}
       <div className="space-y-2">
         <div className="flex justify-between text-sm">
-          <span className="text-gray-300">Overall Progress</span>
-          <span className="text-white">{jobStatus.progress}%</span>
+          <span className="text-muted-foreground">Overall Progress</span>
+          <span className="text-foreground font-semibold">{jobStatus.progress}%</span>
         </div>
         <Progress 
           value={jobStatus.progress} 
-          className="h-2 bg-white/10" 
+          className="h-2.5" 
         />
       </div>
 
       {/* Stage Progress */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {stages.map((stage, index) => {
           const isActive = index === currentStageIndex;
           const isCompleted = index < currentStageIndex || jobStatus.status === 'COMPLETED';
@@ -140,56 +143,62 @@ export function ProcessingStatus({ jobId, onComplete }: ProcessingStatusProps) {
               key={stage.key}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.2 }}
+              transition={{ delay: index * 0.15 }}
               className={`
-                flex items-center space-x-4 p-4 rounded-xl border transition-colors
+                flex items-center gap-4 p-4 rounded-xl border transition-smooth
                 ${isActive 
-                  ? 'bg-white/10 border-purple-500/50' 
+                  ? 'bg-primary/10 border-primary/50 shadow-lg shadow-primary/10' 
                   : isCompleted 
                     ? 'bg-green-500/10 border-green-500/50' 
-                    : 'bg-white/5 border-white/10'
+                    : 'bg-muted/30 border-border'
                 }
               `}
             >
               <div className={`
-                flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center
+                flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center transition-smooth
                 ${isCompleted 
-                  ? 'bg-green-500/20 text-green-400' 
+                  ? 'bg-green-500/20 text-green-500' 
                   : isActive 
-                    ? `bg-purple-500/20 ${stage.color}` 
-                    : 'bg-white/10 text-gray-400'
+                    ? `${stage.bgColor} ${stage.color}` 
+                    : 'bg-muted text-muted-foreground'
                 }
               `}>
                 {isCompleted ? (
-                  <CheckCircle className="w-5 h-5" />
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 200 }}
+                  >
+                    <CheckCircle className="w-6 h-6" />
+                  </motion.div>
                 ) : isActive ? (
                   <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                   >
-                    <Icon className="w-5 h-5" />
+                    <Icon className="w-6 h-6" />
                   </motion.div>
                 ) : (
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-6 h-6" />
                 )}
               </div>
               
-              <div className="flex-1">
-                <h4 className={`font-medium ${
-                  isCompleted ? 'text-green-400' : isActive ? 'text-white' : 'text-gray-400'
+              <div className="flex-1 min-w-0">
+                <h4 className={`font-semibold ${
+                  isCompleted ? 'text-green-500' : isActive ? 'text-foreground' : 'text-muted-foreground'
                 }`}>
                   {stage.label}
                 </h4>
-                <p className="text-sm text-gray-400">
-                  {isCompleted ? 'Completed' : isActive ? stage.description : stage.description}
+                <p className="text-sm text-muted-foreground truncate">
+                  {isCompleted ? '✓ Completed' : isActive ? stage.description : stage.description}
                 </p>
               </div>
               
               {isActive && (
                 <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
+                  animate={{ scale: [1, 1.3, 1], opacity: [0.5, 1, 0.5] }}
                   transition={{ duration: 1.5, repeat: Infinity }}
-                  className="w-2 h-2 bg-purple-400 rounded-full"
+                  className="flex-shrink-0 w-2 h-2 bg-primary rounded-full"
                 />
               )}
             </motion.div>
@@ -200,13 +209,20 @@ export function ProcessingStatus({ jobId, onComplete }: ProcessingStatusProps) {
       {jobStatus.status === 'COMPLETED' && (
         <AnimatePresence>
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-green-500/10 border border-green-500/50 rounded-xl p-4 text-center"
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-green-500/10 border border-green-500/50 rounded-2xl p-6 text-center"
           >
-            <CheckCircle className="w-8 h-8 text-green-400 mx-auto mb-2" />
-            <p className="text-green-400 font-medium">Content Ready!</p>
-            <p className="text-sm text-gray-300">Your Instagram Reel is ready to download</p>
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
+            >
+              <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
+            </motion.div>
+            <p className="text-green-500 font-semibold text-lg mb-1">Content Ready!</p>
+            <p className="text-sm text-muted-foreground">Your Instagram Reel is ready to download</p>
           </motion.div>
         </AnimatePresence>
       )}
