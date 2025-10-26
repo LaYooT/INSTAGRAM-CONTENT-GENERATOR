@@ -189,14 +189,15 @@ export async function formatForInstagram(videoUrl: string): Promise<string> {
 
 /**
  * Get cost estimate for a generation job
+ * Uses actual pricing from ModelCatalog database
  */
-export function estimateJobCost(includeVideo: boolean = true): number {
-  // Image transformation (Flux Dev): ~$0.025
-  // Video generation (Luma): ~$0.05
-  const imageCost = 0.025;
-  const videoCost = 0.05;
-
-  return includeVideo ? imageCost + videoCost : imageCost;
+export async function estimateJobCost(includeVideo: boolean = true): Promise<number> {
+  const { estimateCost } = await import('./fal');
+  
+  return await estimateCost({
+    images: 1,
+    videos: includeVideo ? 1 : 0,
+  });
 }
 
 function delay(ms: number): Promise<void> {

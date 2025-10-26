@@ -9,6 +9,7 @@ import {
   generateAnimatedVideo,
   formatForInstagram,
 } from "@/lib/media-generator";
+import { estimateCost } from "@/lib/fal";
 
 export const dynamic = "force-dynamic";
 
@@ -127,10 +128,11 @@ async function processJobAsync(
 
     await updateJob(jobId, "PROCESSING", 95, "FORMAT");
 
-    // Calculate total cost (Image: ~$0.025, Video: ~$0.05)
-    const imageCost = 0.025; // Flux Dev image transformation
-    const videoCost = 0.05;  // Luma Dream Machine video generation
-    const totalCost = imageCost + videoCost;
+    // Calculate total cost from ModelCatalog database
+    const totalCost = await estimateCost({
+      images: 1, // One transformed image
+      videos: 1, // One animated video
+    });
 
     // Complete with cost tracking
     await updateJobWithCost(jobId, "COMPLETED", 100, "COMPLETED", {

@@ -329,18 +329,42 @@ export async function upscaleImage(imageUrl: string): Promise<string> {
 }
 
 /**
- * Estimate cost for operations
- * FAL.ai pricing (approximate):
- * - Flux Dev: ~$0.025 per image
- * - Luma Dream Machine: ~$0.05 per video
+ * Get model pricing from database
+ * Fetches actual pricing from ModelCatalog instead of hardcoded values
  */
-export function estimateCost(operations: {
+async function getModelPricing(endpoint: string): Promise<number> {
+  try {
+    const model = await prisma.modelCatalog.findUnique({
+      where: { endpoint },
+      select: { pricePerUnit: true }
+    });
+    return model?.pricePerUnit ?? 0;
+  } catch (error) {
+    console.error(`Failed to fetch pricing for ${endpoint}:`, error);
+    // Fallback to approximate values if DB query fails
+    return endpoint.includes('image') ? 0.025 : 0.05;
+  }
+}
+
+/**
+ * Estimate cost for operations
+ * Fetches pricing from ModelCatalog database for accuracy
+ * Falls back to approximate values if database is unavailable
+ */
+export async function estimateCost(operations: {
   images?: number;
   videos?: number;
   videoDuration?: number;
-}): number {
-  const imageCost = 0.025; // $0.025 per image
-  const videoCost = 0.05; // ~$0.05 per video
+  imageModel?: string;
+  videoModel?: string;
+}): Promise<number> {
+  // Default model endpoints
+  const imageEndpoint = operations.imageModel || 'fal-ai/flux/dev';
+  const videoEndpoint = operations.videoModel || 'fal-ai/luma-dream-machine';
+
+  // Fetch actual pricing from database
+  const imageCost = await getModelPricing(imageEndpoint);
+  const videoCost = await getModelPricing(videoEndpoint);
 
   let total = 0;
 
