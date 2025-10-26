@@ -227,7 +227,7 @@ export function VideoPreview({ jobId }: VideoPreviewProps) {
           <TabsTrigger value="variations">Variations ({variations.length})</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="player" className="space-y-4">
+        <TabsContent value="player" className="space-y-6">
           {/* Advanced Video Player */}
           {currentVideoUrl && (
             <AdvancedVideoPlayer
@@ -236,66 +236,70 @@ export function VideoPreview({ jobId }: VideoPreviewProps) {
             />
           )}
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          {/* Action Buttons - Professional Design */}
+          <div className="flex flex-col gap-4">
+            {/* Primary Action - Download */}
             <Button
               onClick={handleDownload}
               disabled={downloading}
-              size="lg"
-              className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+              size="default"
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg shadow-green-500/20 hover:shadow-green-500/30 transition-all duration-300 font-medium"
             >
               {downloading ? (
                 <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Téléchargement...
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Téléchargement en cours...
                 </>
               ) : (
                 <>
-                  <Download className="w-5 h-5 mr-2" />
-                  Télécharger
+                  <Download className="w-4 h-4 mr-2" />
+                  Télécharger la Vidéo
                 </>
               )}
             </Button>
 
-            <Button
-              onClick={handleRegenerate}
-              disabled={regenerating}
-              variant="outline"
-              size="lg"
-              className="border-primary/50 hover:bg-primary/10"
-            >
-              {regenerating ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Régénération...
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="w-5 h-5 mr-2" />
-                  Régénérer
-                </>
-              )}
-            </Button>
+            {/* Secondary Actions */}
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                onClick={handleRegenerate}
+                disabled={regenerating}
+                variant="outline"
+                size="default"
+                className="border-2 border-primary/30 hover:border-primary hover:bg-primary/5 transition-all duration-200"
+              >
+                {regenerating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                    <span className="text-xs sm:text-sm">Régénération...</span>
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-1.5" />
+                    <span className="text-xs sm:text-sm">Régénérer</span>
+                  </>
+                )}
+              </Button>
 
-            <Button
-              onClick={handleGenerateVariations}
-              disabled={generatingVariations}
-              variant="outline"
-              size="lg"
-              className="border-secondary/50 hover:bg-secondary/10"
-            >
-              {generatingVariations ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Génération...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  Générer 3 Variations
-                </>
-              )}
-            </Button>
+              <Button
+                onClick={handleGenerateVariations}
+                disabled={generatingVariations}
+                variant="outline"
+                size="default"
+                className="border-2 border-secondary/30 hover:border-secondary hover:bg-secondary/5 transition-all duration-200"
+              >
+                {generatingVariations ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                    <span className="text-xs sm:text-sm">Génération...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-1.5" />
+                    <span className="text-xs sm:text-sm">3 Variations</span>
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </TabsContent>
 
