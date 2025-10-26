@@ -15,6 +15,7 @@ import {
   Loader2
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { fr } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 
 interface Job {
@@ -166,77 +167,82 @@ export function JobHistory({ onJobSelect }: JobHistoryProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-fluid-md">
       <div>
-        <h2 className="text-2xl font-bold text-white mb-2">Content History</h2>
-        <p className="text-gray-400">View and manage your generated Instagram Reels</p>
+        <h2 className="text-fluid-xl font-bold text-foreground mb-fluid-xs leading-fluid-tight">Historique</h2>
+        <p className="text-fluid-sm text-muted-foreground leading-fluid-normal">
+          Visualisez et gérez vos Reels Instagram générés
+        </p>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-fluid-sm">
         {jobs.map((job) => (
           <div
             key={job.id}
-            className="bg-black/20 border border-white/10 rounded-xl p-4 hover:bg-black/30 transition-colors cursor-pointer"
+            className="glass border border-border rounded-fluid-lg p-fluid-sm hover:bg-muted/5 transition-all cursor-pointer group"
             onClick={() => onJobSelect(job.id)}
           >
-            <div className="flex items-start justify-between">
-              <div className="flex items-start space-x-4 flex-1">
-                {/* Thumbnail */}
-                <div className="w-16 h-16 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-lg flex-shrink-0 overflow-hidden">
-                  {job.originalImageUrl ? (
-                    <img 
-                      src={job.originalImageUrl} 
-                      alt="Thumbnail" 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Play className="w-6 h-6 text-white/40" />
-                    </div>
+            <div className="flex items-start gap-fluid-sm">
+              {/* Thumbnail */}
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-fluid-md flex-shrink-0 overflow-hidden relative">
+                {job.originalImageUrl ? (
+                  <img 
+                    src={job.originalImageUrl} 
+                    alt="Aperçu" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Play className="w-4 h-4 sm:w-6 sm:h-6 text-muted-foreground" />
+                  </div>
+                )}
+                {job.status === 'COMPLETED' && job.finalVideoUrl && (
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                    <Play className="w-5 h-5 sm:w-6 sm:h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity fill-white" />
+                  </div>
+                )}
+              </div>
+
+              {/* Job Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-fluid-xs mb-fluid-xs">
+                  {getStatusIcon(job.status)}
+                  <Badge 
+                    variant="outline" 
+                    className={`text-fluid-xs ${getStatusColor(job.status)}`}
+                  >
+                    {job.status}
+                  </Badge>
+                  {job.status === 'PROCESSING' && (
+                    <span className="text-fluid-xs text-muted-foreground hidden sm:inline">
+                      {job.progress}% • {job.currentStage}
+                    </span>
                   )}
                 </div>
-
-                {/* Job Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center space-x-2 mb-2">
-                    {getStatusIcon(job.status)}
-                    <Badge 
-                      variant="outline" 
-                      className={`text-xs ${getStatusColor(job.status)}`}
-                    >
-                      {job.status}
-                    </Badge>
-                    {job.status === 'PROCESSING' && (
-                      <span className="text-xs text-gray-400">
-                        {job.progress}% • {job.currentStage}
+                
+                <p className="text-fluid-sm text-foreground/80 mb-fluid-xs leading-fluid-tight">
+                  Créé {formatDistanceToNow(new Date(job.createdAt), { addSuffix: true, locale: fr })}
+                </p>
+                
+                <div className="flex flex-wrap items-center gap-fluid-xs text-fluid-xs text-muted-foreground">
+                  {job.completedAt && (
+                    <span className="hidden sm:inline">
+                      Terminé {formatDistanceToNow(new Date(job.completedAt), { addSuffix: true, locale: fr })}
+                    </span>
+                  )}
+                  {job.cost && job.cost > 0 && (
+                    <>
+                      {job.completedAt && <span className="hidden sm:inline">•</span>}
+                      <span className="text-green-500 font-semibold">
+                        €{job.cost.toFixed(3)}
                       </span>
-                    )}
-                  </div>
-                  
-                  <p className="text-sm text-gray-300 mb-1">
-                    Created {formatDistanceToNow(new Date(job.createdAt), { addSuffix: true })}
-                  </p>
-                  
-                  <div className="flex items-center gap-3 text-xs text-gray-400">
-                    {job.completedAt && (
-                      <span>
-                        Completed {formatDistanceToNow(new Date(job.completedAt), { addSuffix: true })}
-                      </span>
-                    )}
-                    {job.cost && job.cost > 0 && (
-                      <>
-                        {job.completedAt && <span>•</span>}
-                        <span className="text-green-400 font-semibold">
-                          €{job.cost.toFixed(3)}
-                        </span>
-                      </>
-                    )}
-                  </div>
+                    </>
+                  )}
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="flex items-center space-x-2 ml-4">
+              {/* Actions - Mobile & Desktop Responsive */}
+              <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1 sm:gap-fluid-xs flex-shrink-0">
                 {job.status === 'COMPLETED' && job.finalVideoUrl && (
                   <>
                     <Button
@@ -246,7 +252,7 @@ export function JobHistory({ onJobSelect }: JobHistoryProps) {
                         e.stopPropagation();
                         onJobSelect(job.id);
                       }}
-                      className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
+                      className="text-primary hover:text-primary hover:bg-primary/10 h-8 w-8 sm:h-9 sm:w-9 p-0"
                       title="Voir la vidéo"
                     >
                       <Eye className="w-4 h-4" />
@@ -257,8 +263,8 @@ export function JobHistory({ onJobSelect }: JobHistoryProps) {
                       variant="ghost"
                       onClick={(e) => handleDownload(job.id, e)}
                       disabled={downloadingJobId === job.id}
-                      className="text-green-400 hover:text-green-300 hover:bg-green-500/10"
-                      title="Télécharger la vidéo"
+                      className="text-green-500 hover:text-green-400 hover:bg-green-500/10 h-8 w-8 sm:h-9 sm:w-9 p-0"
+                      title="Télécharger"
                     >
                       {downloadingJobId === job.id ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -273,8 +279,8 @@ export function JobHistory({ onJobSelect }: JobHistoryProps) {
                   size="sm"
                   variant="ghost"
                   onClick={(e) => handleDeleteJob(job.id, e)}
-                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                  title="Supprimer le job"
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8 sm:h-9 sm:w-9 p-0"
+                  title="Supprimer"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>

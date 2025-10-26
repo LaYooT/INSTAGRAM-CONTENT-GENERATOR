@@ -26,6 +26,13 @@ export function ContentGenerator({ session }: ContentGeneratorProps) {
 
   const INITIAL_BUDGET = 20.0;
 
+  // Handle job selection from history - switch to create tab and show preview
+  const handleJobSelect = (jobId: string) => {
+    setCurrentJobId(jobId);
+    setActiveTab("create");
+    setIsProcessing(false);
+  };
+
   useEffect(() => {
     const fetchBudget = async () => {
       try {
@@ -190,7 +197,7 @@ export function ContentGenerator({ session }: ContentGeneratorProps) {
                 transition={pageTransition}
               >
                 <div className="glass rounded-fluid-lg p-fluid-md border border-border">
-                  <JobHistory onJobSelect={setCurrentJobId} />
+                  <JobHistory onJobSelect={handleJobSelect} />
                 </div>
               </motion.div>
             )}

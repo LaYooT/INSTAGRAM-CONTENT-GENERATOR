@@ -219,15 +219,22 @@ export function VideoPreview({ jobId }: VideoPreviewProps) {
     : jobData.finalVideoUrl;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-fluid-md">
       <Tabs defaultValue="player" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="player">Lecteur</TabsTrigger>
-          <TabsTrigger value="compare">Comparer</TabsTrigger>
-          <TabsTrigger value="variations">Variations ({variations.length})</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 glass">
+          <TabsTrigger value="player" className="text-fluid-xs sm:text-fluid-sm">
+            Lecteur
+          </TabsTrigger>
+          <TabsTrigger value="compare" className="text-fluid-xs sm:text-fluid-sm">
+            Comparer
+          </TabsTrigger>
+          <TabsTrigger value="variations" className="text-fluid-xs sm:text-fluid-sm">
+            <span className="hidden sm:inline">Variations</span>
+            <span className="sm:hidden">Var.</span> ({variations.length})
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="player" className="space-y-6">
+        <TabsContent value="player" className="space-y-fluid-md">
           {/* Advanced Video Player */}
           {currentVideoUrl && (
             <AdvancedVideoPlayer
@@ -236,46 +243,46 @@ export function VideoPreview({ jobId }: VideoPreviewProps) {
             />
           )}
 
-          {/* Action Buttons - Professional Design */}
-          <div className="flex flex-col gap-4">
+          {/* Action Buttons - Responsive */}
+          <div className="flex flex-col gap-fluid-sm">
             {/* Primary Action - Download */}
             <Button
               onClick={handleDownload}
               disabled={downloading}
               size="default"
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg shadow-green-500/20 hover:shadow-green-500/30 transition-all duration-300 font-medium"
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg shadow-green-500/20 hover:shadow-green-500/30 transition-all duration-300 font-medium text-fluid-sm h-10 sm:h-11"
             >
               {downloading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Téléchargement en cours...
+                  <span className="text-fluid-sm">Téléchargement...</span>
                 </>
               ) : (
                 <>
                   <Download className="w-4 h-4 mr-2" />
-                  Télécharger la Vidéo
+                  <span className="text-fluid-sm">Télécharger</span>
                 </>
               )}
             </Button>
 
             {/* Secondary Actions */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-fluid-xs">
               <Button
                 onClick={handleRegenerate}
                 disabled={regenerating}
                 variant="outline"
                 size="default"
-                className="border-2 border-primary/30 hover:border-primary hover:bg-primary/5 transition-all duration-200"
+                className="border-2 border-primary/30 hover:border-primary hover:bg-primary/5 transition-all duration-200 h-10 sm:h-11"
               >
                 {regenerating ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
-                    <span className="text-xs sm:text-sm">Régénération...</span>
+                    <span className="text-fluid-xs sm:text-fluid-sm">Génération...</span>
                   </>
                 ) : (
                   <>
                     <RefreshCw className="w-4 h-4 mr-1.5" />
-                    <span className="text-xs sm:text-sm">Régénérer</span>
+                    <span className="text-fluid-xs sm:text-fluid-sm">Régénérer</span>
                   </>
                 )}
               </Button>
@@ -285,17 +292,17 @@ export function VideoPreview({ jobId }: VideoPreviewProps) {
                 disabled={generatingVariations}
                 variant="outline"
                 size="default"
-                className="border-2 border-secondary/30 hover:border-secondary hover:bg-secondary/5 transition-all duration-200"
+                className="border-2 border-secondary/30 hover:border-secondary hover:bg-secondary/5 transition-all duration-200 h-10 sm:h-11"
               >
                 {generatingVariations ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
-                    <span className="text-xs sm:text-sm">Génération...</span>
+                    <span className="text-fluid-xs sm:text-fluid-sm">Génération...</span>
                   </>
                 ) : (
                   <>
                     <Sparkles className="w-4 h-4 mr-1.5" />
-                    <span className="text-xs sm:text-sm">3 Variations</span>
+                    <span className="text-fluid-xs sm:text-fluid-sm">3 Variations</span>
                   </>
                 )}
               </Button>
@@ -305,10 +312,10 @@ export function VideoPreview({ jobId }: VideoPreviewProps) {
 
         <TabsContent value="compare">
           {/* Before/After Comparison */}
-          {jobData.originalImageUrl && jobData.finalVideoUrl && (
+          {jobData.originalImageUrl && currentVideoUrl && (
             <BeforeAfterComparison
               beforeImage={jobData.originalImageUrl}
-              afterVideoUrl={jobData.finalVideoUrl}
+              afterVideoUrl={currentVideoUrl}
             />
           )}
         </TabsContent>
@@ -324,27 +331,31 @@ export function VideoPreview({ jobId }: VideoPreviewProps) {
               regenerating={generatingVariations}
             />
           ) : (
-            <div className="text-center py-12 space-y-4">
-              <ImageIcon className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-foreground">Aucune variation</h3>
-              <p className="text-muted-foreground">
-                Générez des variations pour explorer différentes versions de votre vidéo
-              </p>
+            <div className="text-center py-fluid-lg space-y-fluid-sm">
+              <ImageIcon className="w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground mx-auto" />
+              <div>
+                <h3 className="text-fluid-lg font-semibold text-foreground leading-fluid-tight">
+                  Aucune variation
+                </h3>
+                <p className="text-fluid-sm text-muted-foreground mt-fluid-xs leading-fluid-normal">
+                  Générez des variations pour explorer différentes versions
+                </p>
+              </div>
               <Button
                 onClick={handleGenerateVariations}
                 disabled={generatingVariations}
                 size="lg"
-                className="mt-4"
+                className="mt-fluid-sm"
               >
                 {generatingVariations ? (
                   <>
                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Génération...
+                    <span className="text-fluid-sm">Génération...</span>
                   </>
                 ) : (
                   <>
                     <Sparkles className="w-5 h-5 mr-2" />
-                    Générer 3 Variations
+                    <span className="text-fluid-sm">Générer 3 Variations</span>
                   </>
                 )}
               </Button>

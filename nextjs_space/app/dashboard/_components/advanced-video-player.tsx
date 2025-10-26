@@ -206,7 +206,7 @@ export function AdvancedVideoPlayer({
   return (
     <div 
       ref={containerRef}
-      className={`relative bg-black rounded-2xl overflow-hidden group ${isFullscreen ? 'w-screen h-screen' : 'aspect-[9/16] max-w-xs mx-auto'}`}
+      className={`relative bg-black rounded-fluid-lg overflow-hidden group ${isFullscreen ? 'w-screen h-screen rounded-none' : 'aspect-[9/16] max-w-xs mx-auto'}`}
     >
       <video
         ref={videoRef}
@@ -228,27 +228,27 @@ export function AdvancedVideoPlayer({
         onClick={handlePlayPause}
       />
 
-      {/* Central Play Button */}
+      {/* Central Play Button - Responsive */}
       {!isPlaying && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm transition-opacity">
           <Button
             size="lg"
             onClick={handlePlayPause}
-            className="w-20 h-20 rounded-full bg-white/90 hover:bg-white shadow-2xl"
+            className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/90 hover:bg-white shadow-2xl"
           >
-            <Play className="w-10 h-10 text-black fill-black ml-1" />
+            <Play className="w-8 h-8 sm:w-10 sm:h-10 text-black fill-black ml-1" />
           </Button>
         </div>
       )}
 
-      {/* Video Controls */}
+      {/* Video Controls - Responsive */}
       <div 
-        className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/80 to-transparent p-4 transition-opacity duration-300 ${
+        className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/80 to-transparent p-2 sm:p-4 transition-opacity duration-300 ${
           showControls || !isPlaying ? 'opacity-100' : 'opacity-0'
         }`}
       >
         {/* Timeline */}
-        <div className="mb-3">
+        <div className="mb-2 sm:mb-3">
           <Slider
             value={[currentTime]}
             max={duration || 100}
@@ -256,53 +256,53 @@ export function AdvancedVideoPlayer({
             onValueChange={handleTimeChange}
             className="cursor-pointer"
           />
-          <div className="flex justify-between text-xs text-white/70 mt-1">
+          <div className="flex justify-between text-fluid-xs text-white/70 mt-1">
             <span>{formatTime(currentTime)}</span>
             <span>{formatTime(duration)}</span>
           </div>
         </div>
 
-        {/* Control Buttons */}
+        {/* Control Buttons - Responsive */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <Button
               size="sm"
               variant="ghost"
               onClick={handlePlayPause}
-              className="text-white hover:bg-white/20"
+              className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 p-0"
             >
-              {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+              {isPlaying ? <Pause className="w-4 h-4 sm:w-5 sm:h-5" /> : <Play className="w-4 h-4 sm:w-5 sm:h-5" />}
             </Button>
 
             <Button
               size="sm"
               variant="ghost"
               onClick={() => videoRef.current && (videoRef.current.currentTime -= 10)}
-              className="text-white hover:bg-white/20"
+              className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 p-0 hidden xs:flex"
             >
-              <SkipBack className="w-5 h-5" />
+              <SkipBack className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
 
             <Button
               size="sm"
               variant="ghost"
               onClick={() => videoRef.current && (videoRef.current.currentTime += 10)}
-              className="text-white hover:bg-white/20"
+              className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 p-0 hidden xs:flex"
             >
-              <SkipForward className="w-5 h-5" />
+              <SkipForward className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
 
             {/* Volume Control */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <Button
                 size="sm"
                 variant="ghost"
                 onClick={handleMuteToggle}
-                className="text-white hover:bg-white/20"
+                className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 p-0"
               >
-                {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                {isMuted ? <VolumeX className="w-4 h-4 sm:w-5 sm:h-5" /> : <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />}
               </Button>
-              <div className="w-20 hidden sm:block">
+              <div className="w-16 sm:w-20 hidden md:block">
                 <Slider
                   value={[volume]}
                   max={1}
@@ -314,17 +314,17 @@ export function AdvancedVideoPlayer({
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
-            {/* Playback Speed */}
+          <div className="flex items-center gap-1 sm:gap-2">
+            {/* Playback Speed - Hidden on small mobile */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="text-white hover:bg-white/20"
+                  className="text-white hover:bg-white/20 h-8 sm:h-9 px-2 sm:px-3 hidden xs:flex"
                 >
-                  <Settings className="w-5 h-5" />
-                  <span className="ml-1 text-xs">{playbackRate}x</span>
+                  <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="ml-1 text-fluid-xs">{playbackRate}x</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -345,28 +345,34 @@ export function AdvancedVideoPlayer({
               size="sm"
               variant="ghost"
               onClick={handleFullscreen}
-              className="text-white hover:bg-white/20"
+              className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 p-0"
             >
-              {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+              {isFullscreen ? <Minimize className="w-4 h-4 sm:w-5 sm:h-5" /> : <Maximize className="w-4 h-4 sm:w-5 sm:h-5" />}
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Video Info Badge */}
-      <div className="absolute top-4 left-4 right-4 flex justify-between items-start opacity-0 group-hover:opacity-100 transition-opacity">
-        <div className="bg-black/70 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full">
-          {videoDimensions.width} × {videoDimensions.height}
-          {fileSize && ` • ${formatFileSize(fileSize)}`}
+      {/* Video Info Badge - Responsive */}
+      <div className="absolute top-2 sm:top-4 left-2 sm:left-4 right-2 sm:right-4 flex justify-between items-start opacity-0 group-hover:opacity-100 transition-opacity gap-2">
+        <div className="bg-black/70 backdrop-blur-sm text-white text-fluid-xs px-2 py-1 sm:px-3 sm:py-1.5 rounded-full">
+          <span className="hidden sm:inline">{videoDimensions.width} × {videoDimensions.height}</span>
+          <span className="sm:hidden">{videoDimensions.width}×{videoDimensions.height}</span>
+          {fileSize && (
+            <>
+              <span className="hidden sm:inline"> • {formatFileSize(fileSize)}</span>
+            </>
+          )}
         </div>
-        <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg">
-          Instagram Ready
+        <div className="bg-gradient-to-r from-primary to-secondary text-white text-fluid-xs font-semibold px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-lg">
+          <span className="hidden sm:inline">Instagram Ready</span>
+          <span className="sm:hidden">IG ✓</span>
         </div>
       </div>
 
-      {/* Keyboard Shortcuts Hint */}
+      {/* Keyboard Shortcuts Hint - Desktop only */}
       {!isFullscreen && (
-        <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block">
           <div className="bg-black/70 backdrop-blur-sm text-white text-xs px-3 py-2 rounded-lg">
             <p className="font-semibold mb-1">Raccourcis:</p>
             <p>Space: Play/Pause</p>

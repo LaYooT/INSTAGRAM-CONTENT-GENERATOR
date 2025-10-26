@@ -14,15 +14,17 @@ export function BeforeAfterComparison({ beforeImage, afterVideoUrl }: BeforeAfte
   const [sliderPosition, setSliderPosition] = useState(50);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-fluid-sm">
       <div className="text-center">
-        <h3 className="text-lg font-bold text-foreground mb-2">Comparaison Avant / Après</h3>
-        <p className="text-sm text-muted-foreground">
+        <h3 className="text-fluid-lg font-bold text-foreground mb-fluid-xs leading-fluid-tight">
+          Comparaison Avant / Après
+        </h3>
+        <p className="text-fluid-sm text-muted-foreground leading-fluid-normal">
           Faites glisser le curseur pour comparer
         </p>
       </div>
 
-      <div className="relative aspect-[9/16] max-w-xs mx-auto bg-black rounded-2xl overflow-hidden">
+      <div className="relative aspect-[9/16] max-w-xs mx-auto bg-black rounded-fluid-lg overflow-hidden">
         {/* Before Image */}
         <div className="absolute inset-0">
           <div className="relative w-full h-full">
@@ -33,7 +35,7 @@ export function BeforeAfterComparison({ beforeImage, afterVideoUrl }: BeforeAfte
               className="object-cover"
             />
           </div>
-          <div className="absolute bottom-4 left-4 bg-black/70 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+          <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 bg-black/70 backdrop-blur-sm text-white text-fluid-xs font-semibold px-2 py-1 sm:px-3 sm:py-1.5 rounded-full">
             AVANT
           </div>
         </div>
@@ -53,27 +55,27 @@ export function BeforeAfterComparison({ beforeImage, afterVideoUrl }: BeforeAfte
             muted
             playsInline
           />
-          <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+          <div className="absolute bottom-2 right-2 sm:bottom-4 sm:right-4 bg-black/70 backdrop-blur-sm text-white text-fluid-xs font-semibold px-2 py-1 sm:px-3 sm:py-1.5 rounded-full">
             APRÈS
           </div>
         </div>
 
-        {/* Slider Handle */}
+        {/* Slider Handle - Responsive */}
         <div 
-          className="absolute top-0 bottom-0 w-1 bg-white shadow-lg z-10"
+          className="absolute top-0 bottom-0 w-0.5 sm:w-1 bg-white shadow-lg z-10"
           style={{ left: `${sliderPosition}%` }}
         >
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-xl flex items-center justify-center">
-            <div className="flex space-x-1">
-              <div className="w-0.5 h-4 bg-gray-400"></div>
-              <div className="w-0.5 h-4 bg-gray-400"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 sm:w-8 sm:h-8 bg-white rounded-full shadow-xl flex items-center justify-center">
+            <div className="flex space-x-0.5 sm:space-x-1">
+              <div className="w-0.5 h-3 sm:h-4 bg-gray-400"></div>
+              <div className="w-0.5 h-3 sm:h-4 bg-gray-400"></div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Slider Control */}
-      <div className="max-w-xs mx-auto px-4">
+      <div className="max-w-xs mx-auto px-fluid-sm">
         <Slider
           value={[sliderPosition]}
           max={100}
@@ -81,6 +83,13 @@ export function BeforeAfterComparison({ beforeImage, afterVideoUrl }: BeforeAfte
           onValueChange={(value) => setSliderPosition(value[0])}
           className="cursor-pointer"
         />
+      </div>
+
+      {/* Instructions - Mobile Friendly */}
+      <div className="max-w-xs mx-auto text-center">
+        <p className="text-fluid-xs text-muted-foreground leading-fluid-normal">
+          💡 Glissez le curseur ou utilisez le slider ci-dessus
+        </p>
       </div>
     </div>
   );
