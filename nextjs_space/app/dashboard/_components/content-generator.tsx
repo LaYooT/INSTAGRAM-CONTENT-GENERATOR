@@ -10,6 +10,7 @@ import { JobHistory } from "./job-history";
 import { BottomNav } from "./bottom-nav";
 import { SettingsPanel } from "./settings-panel";
 import { UserProfile } from "./user-profile";
+import { AdminPanel } from "./admin-panel";
 import { Sparkles, Play } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -20,7 +21,7 @@ interface ContentGeneratorProps {
 export function ContentGenerator({ session }: ContentGeneratorProps) {
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [activeTab, setActiveTab] = useState<"create" | "history" | "settings" | "profile">("create");
+  const [activeTab, setActiveTab] = useState<"create" | "history" | "settings" | "profile" | "admin">("create");
   const [budgetInfo, setBudgetInfo] = useState({ spent: 0, remaining: 20.0 });
 
   const INITIAL_BUDGET = 20.0;
@@ -217,6 +218,21 @@ export function ContentGenerator({ session }: ContentGeneratorProps) {
                 transition={pageTransition}
               >
                 <UserProfile session={session} />
+              </motion.div>
+            )}
+
+            {activeTab === "admin" && (
+              <motion.div
+                key="admin"
+                variants={pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={pageTransition}
+              >
+                <div className="glass rounded-2xl p-6 border border-border">
+                  <AdminPanel session={session} />
+                </div>
               </motion.div>
             )}
           </AnimatePresence>

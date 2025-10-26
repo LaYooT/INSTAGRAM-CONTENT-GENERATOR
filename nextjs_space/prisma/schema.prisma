@@ -45,6 +45,10 @@ model User {
   password      String?
   firstName     String?
   lastName      String?
+  role          UserRole  @default(USER)
+  isApproved    Boolean   @default(false)
+  approvedAt    DateTime?
+  approvedBy    String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -113,4 +117,9 @@ enum ProcessingStage {
   ANIMATE
   FORMAT
   COMPLETED
+}
+
+enum UserRole {
+  ADMIN
+  USER
 }

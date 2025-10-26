@@ -10,6 +10,8 @@ declare module "next-auth" {
       image?: string | null;
       firstName?: string | null;
       lastName?: string | null;
+      role?: string;
+      isApproved?: boolean;
     }
   }
 
@@ -17,6 +19,8 @@ declare module "next-auth" {
     id: string;
     firstName?: string | null;
     lastName?: string | null;
+    role?: string;
+    isApproved?: boolean;
   }
 }
 
@@ -25,5 +29,7 @@ declare module "next-auth/jwt" {
     id: string;
     firstName?: string | null;
     lastName?: string | null;
+    role?: string;
+    isApproved?: boolean;
   }
 }

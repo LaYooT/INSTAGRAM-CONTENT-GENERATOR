@@ -1,16 +1,17 @@
 
 "use client";
 
-import { Home, History, Settings, User } from "lucide-react";
+import { Home, History, Settings, User, Shield } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useSession } from "next-auth/react";
 
 interface BottomNavProps {
-  activeTab: "create" | "history" | "settings" | "profile";
-  onTabChange: (tab: "create" | "history" | "settings" | "profile") => void;
+  activeTab: "create" | "history" | "settings" | "profile" | "admin";
+  onTabChange: (tab: "create" | "history" | "settings" | "profile" | "admin") => void;
 }
 
-const navItems = [
+const baseNavItems = [
   {
     id: "create" as const,
     label: "Create",
@@ -33,12 +34,24 @@ const navItems = [
   },
 ];
 
+const adminNavItem = {
+  id: "admin" as const,
+  label: "Admin",
+  icon: Shield,
+};
+
 export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
+  const { data: session } = useSession() || {};
+  const isAdmin = session?.user?.role === "ADMIN";
+  
+  const navItems = isAdmin ? [...baseNavItems, adminNavItem] : baseNavItems;
+  const gridCols = isAdmin ? "grid-cols-5" : "grid-cols-4";
+
   return (
     <>
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass border-t border-white/10 pb-safe">
-        <div className="grid grid-cols-4 h-16">
+        <div className={cn("grid h-16", gridCols)}>
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;

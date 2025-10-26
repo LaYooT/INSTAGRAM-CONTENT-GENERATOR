@@ -22,7 +22,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null;
+          throw new Error("Email et mot de passe requis");
         }
 
         const user = await prisma.user.findUnique({
@@ -32,7 +32,7 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!user) {
-          return null;
+          throw new Error("Email ou mot de passe incorrect");
         }
 
         const isPasswordValid = await bcryptjs.compare(
@@ -41,7 +41,12 @@ export const authOptions: NextAuthOptions = {
         );
 
         if (!isPasswordValid) {
-          return null;
+          throw new Error("Email ou mot de passe incorrect");
+        }
+
+        // Check if user is approved
+        if (!user.isApproved) {
+          throw new Error("Votre compte n'a pas encore été approuvé par l'administrateur. Veuillez patienter.");
         }
 
         return {
@@ -50,6 +55,8 @@ export const authOptions: NextAuthOptions = {
           name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
           firstName: user.firstName,
           lastName: user.lastName,
+          role: user.role,
+          isApproved: user.isApproved,
         };
       }
     })
@@ -63,6 +70,8 @@ export const authOptions: NextAuthOptions = {
           id: token.id,
           firstName: token.firstName,
           lastName: token.lastName,
+          role: token.role,
+          isApproved: token.isApproved,
         }
       };
     },
@@ -73,6 +82,8 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           firstName: (user as any).firstName,
           lastName: (user as any).lastName,
+          role: (user as any).role,
+          isApproved: (user as any).isApproved,
         };
       }
       return token;

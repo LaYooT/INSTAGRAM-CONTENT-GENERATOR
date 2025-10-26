@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcryptjs.hash(password, 12);
 
-    // Create user
+    // Create user (requires admin approval)
     const user = await prisma.user.create({
       data: {
         email,
@@ -38,6 +38,8 @@ export async function POST(request: NextRequest) {
         firstName,
         lastName,
         name: `${firstName || ''} ${lastName || ''}`.trim() || null,
+        role: "USER",
+        isApproved: false, // Requires admin approval
       },
     });
 
@@ -47,7 +49,8 @@ export async function POST(request: NextRequest) {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-      }
+      },
+      message: "Account created successfully. Please wait for administrator approval before logging in."
     });
   } catch (error) {
     console.error("Signup error:", error);
