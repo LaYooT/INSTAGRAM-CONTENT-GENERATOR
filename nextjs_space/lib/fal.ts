@@ -77,7 +77,6 @@ export async function transformImageWithAI(
         num_inference_steps: 40, // Number of denoising steps for quality
         guidance_scale: 3.5, // Adherence to the prompt
         num_images: 1,
-        enable_safety_checker: true,
         output_format: 'jpeg',
       },
       logs: true,
@@ -178,7 +177,6 @@ export async function upscaleImage(imageUrl: string): Promise<string> {
         num_inference_steps: 50,
         guidance_scale: 4.0,
         num_images: 1,
-        enable_safety_checker: true,
         output_format: 'jpeg',
       },
       logs: true,
