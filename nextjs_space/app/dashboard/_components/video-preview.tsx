@@ -155,85 +155,107 @@ export function VideoPreview({ jobId }: VideoPreviewProps) {
 
   return (
     <div className="space-y-4">
-      {/* Video Player */}
-      <div className="aspect-[9/16] max-w-xs mx-auto relative bg-black rounded-lg overflow-hidden shadow-2xl">
+      {/* Video Player avec contrôles améliorés */}
+      <div className="aspect-[9/16] max-w-xs mx-auto relative bg-black rounded-2xl overflow-hidden shadow-2xl ring-2 ring-primary/20">
         <video
           ref={videoRef}
           src={jobData.finalVideoUrl}
           className="w-full h-full object-cover"
           loop
+          playsInline
           muted={isMuted}
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
           onEnded={() => setIsPlaying(false)}
+          onClick={handlePlayPause}
         />
         
-        {/* Video Controls Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 hover:opacity-100 transition-opacity">
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-            <div className="flex items-center space-x-3">
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={handlePlayPause}
-                className="bg-black/50 hover:bg-black/70 border-none"
-              >
-                {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-              </Button>
-              
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={handleRestart}
-                className="bg-black/50 hover:bg-black/70 border-none"
-              >
-                <RotateCcw className="w-4 h-4" />
-              </Button>
-              
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={handleMuteToggle}
-                className="bg-black/50 hover:bg-black/70 border-none"
-              >
-                {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-              </Button>
-            </div>
+        {/* Bouton Play Central (affiché quand la vidéo est en pause) */}
+        {!isPlaying && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm transition-opacity">
+            <Button
+              size="lg"
+              onClick={handlePlayPause}
+              className="w-20 h-20 rounded-full bg-white/90 hover:bg-white shadow-2xl"
+            >
+              <Play className="w-10 h-10 text-black fill-black ml-1" />
+            </Button>
+          </div>
+        )}
+        
+        {/* Contrôles vidéo en bas */}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-4 transition-opacity hover:opacity-100" 
+             style={{ opacity: isPlaying ? 0.7 : 1 }}>
+          <div className="flex items-center justify-center space-x-3">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handlePlayPause}
+              className="text-white hover:bg-white/20 backdrop-blur-sm"
+            >
+              {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+            </Button>
+            
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handleRestart}
+              className="text-white hover:bg-white/20 backdrop-blur-sm"
+            >
+              <RotateCcw className="w-5 h-5" />
+            </Button>
+            
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handleMuteToggle}
+              className="text-white hover:bg-white/20 backdrop-blur-sm"
+            >
+              {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+            </Button>
+          </div>
+        </div>
+
+        {/* Badge Instagram Ready */}
+        <div className="absolute top-4 right-4">
+          <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
+            Instagram Ready
           </div>
         </div>
       </div>
 
-      {/* Video Info */}
-      <div className="text-center space-y-2">
-        <div className="flex items-center justify-center space-x-4 text-sm text-gray-400">
-          <span>1080x1920</span>
+      {/* Informations de la vidéo */}
+      <div className="text-center space-y-3">
+        <div className="inline-flex items-center justify-center space-x-3 text-sm text-muted-foreground bg-muted/50 px-4 py-2 rounded-full">
+          <span className="font-semibold">1080 × 1920</span>
           <span>•</span>
           <span>9:16</span>
           <span>•</span>
-          <span>Instagram Ready</span>
+          <span>MP4</span>
         </div>
         
-        <p className="text-gray-300">
-          Your video is optimized for Instagram Reels and ready to post!
+        <p className="text-foreground text-sm">
+          Votre vidéo est optimisée pour Instagram Reels et prête à être publiée !
         </p>
       </div>
 
-      {/* Download Button */}
+      {/* Bouton de téléchargement amélioré */}
       <div className="flex justify-center">
         <Button
           onClick={handleDownload}
           disabled={downloading}
-          className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-6"
+          size="lg"
+          className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold px-8 shadow-lg shadow-green-500/30"
         >
           {downloading ? (
             <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Downloading...
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              Téléchargement en cours...
             </>
           ) : (
             <>
-              <Download className="w-4 h-4 mr-2" />
-              Download Video
+              <Download className="w-5 h-5 mr-2" />
+              Télécharger la vidéo
             </>
           )}
         </Button>

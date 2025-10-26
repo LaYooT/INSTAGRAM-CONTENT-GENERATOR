@@ -11,9 +11,11 @@ import {
   Play, 
   Download,
   Trash2,
-  Eye
+  Eye,
+  Loader2
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 interface Job {
   id: string;
@@ -24,6 +26,7 @@ interface Job {
   completedAt?: string;
   originalImageUrl: string;
   finalVideoUrl?: string;
+  cost?: number;
 }
 
 interface JobHistoryProps {
@@ -33,6 +36,8 @@ interface JobHistoryProps {
 export function JobHistory({ onJobSelect }: JobHistoryProps) {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [downloadingJobId, setDownloadingJobId] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchJobs();
@@ -52,10 +57,45 @@ export function JobHistory({ onJobSelect }: JobHistoryProps) {
     }
   };
 
+  const handleDownload = async (jobId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    setDownloadingJobId(jobId);
+    try {
+      const response = await fetch(`/api/download/${jobId}`);
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `instagram-reel-${jobId.slice(0, 8)}-${Date.now()}.mp4`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        toast({
+          title: "Téléchargement démarré",
+          description: "Votre vidéo Instagram Reel est en cours de téléchargement.",
+        });
+      } else {
+        throw new Error('Download failed');
+      }
+    } catch (error) {
+      toast({
+        title: "Échec du téléchargement",
+        description: "Impossible de télécharger la vidéo. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    } finally {
+      setDownloadingJobId(null);
+    }
+  };
+
   const handleDeleteJob = async (jobId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     
-    if (!confirm('Are you sure you want to delete this job?')) return;
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce job ?')) return;
 
     try {
       const response = await fetch(`/api/jobs/${jobId}`, {
@@ -64,9 +104,18 @@ export function JobHistory({ onJobSelect }: JobHistoryProps) {
       
       if (response.ok) {
         setJobs(jobs.filter(job => job.id !== jobId));
+        toast({
+          title: "Job supprimé",
+          description: "Le job a été supprimé avec succès.",
+        });
       }
     } catch (error) {
       console.error('Failed to delete job:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer le job.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -168,11 +217,21 @@ export function JobHistory({ onJobSelect }: JobHistoryProps) {
                     Created {formatDistanceToNow(new Date(job.createdAt), { addSuffix: true })}
                   </p>
                   
-                  {job.completedAt && (
-                    <p className="text-xs text-gray-400">
-                      Completed {formatDistanceToNow(new Date(job.completedAt), { addSuffix: true })}
-                    </p>
-                  )}
+                  <div className="flex items-center gap-3 text-xs text-gray-400">
+                    {job.completedAt && (
+                      <span>
+                        Completed {formatDistanceToNow(new Date(job.completedAt), { addSuffix: true })}
+                      </span>
+                    )}
+                    {job.cost && job.cost > 0 && (
+                      <>
+                        {job.completedAt && <span>•</span>}
+                        <span className="text-green-400 font-semibold">
+                          €{job.cost.toFixed(3)}
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -188,6 +247,7 @@ export function JobHistory({ onJobSelect }: JobHistoryProps) {
                         onJobSelect(job.id);
                       }}
                       className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
+                      title="Voir la vidéo"
                     >
                       <Eye className="w-4 h-4" />
                     </Button>
@@ -195,13 +255,16 @@ export function JobHistory({ onJobSelect }: JobHistoryProps) {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Download logic would go here
-                      }}
+                      onClick={(e) => handleDownload(job.id, e)}
+                      disabled={downloadingJobId === job.id}
                       className="text-green-400 hover:text-green-300 hover:bg-green-500/10"
+                      title="Télécharger la vidéo"
                     >
-                      <Download className="w-4 h-4" />
+                      {downloadingJobId === job.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Download className="w-4 h-4" />
+                      )}
                     </Button>
                   </>
                 )}
@@ -211,6 +274,7 @@ export function JobHistory({ onJobSelect }: JobHistoryProps) {
                   variant="ghost"
                   onClick={(e) => handleDeleteJob(job.id, e)}
                   className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                  title="Supprimer le job"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>

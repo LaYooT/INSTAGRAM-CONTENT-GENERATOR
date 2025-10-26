@@ -124,12 +124,17 @@ async function processJobAsync(
 
     await updateJob(jobId, "PROCESSING", 95, "FORMAT");
 
-    // Complete
-    await updateJob(jobId, "COMPLETED", 100, "COMPLETED", {
-      finalVideoUrl,
-    });
+    // Calculate total cost (Image: ~$0.025, Video: ~$0.05)
+    const imageCost = 0.025; // Flux Dev image transformation
+    const videoCost = 0.05;  // Luma Dream Machine video generation
+    const totalCost = imageCost + videoCost;
 
-    console.log(`[Job ${jobId}] Processing completed successfully!`);
+    // Complete with cost tracking
+    await updateJobWithCost(jobId, "COMPLETED", 100, "COMPLETED", {
+      finalVideoUrl,
+    }, totalCost);
+
+    console.log(`[Job ${jobId}] Processing completed successfully! Total cost: $${totalCost}`);
   } catch (error) {
     console.error(`[Job ${jobId}] Processing error:`, error);
     await updateJob(
@@ -168,6 +173,39 @@ async function updateJob(
     updateData.animatedVideoUrl = urls.animatedVideoUrl;
   if (urls.finalVideoUrl) updateData.finalVideoUrl = urls.finalVideoUrl;
   if (errorMessage) updateData.errorMessage = errorMessage;
+  if (status === "COMPLETED") updateData.completedAt = new Date();
+
+  await prisma.contentJob.update({
+    where: { id: jobId },
+    data: updateData,
+  });
+}
+
+async function updateJobWithCost(
+  jobId: string,
+  status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED",
+  progress: number,
+  currentStage: "TRANSFORM" | "ANIMATE" | "FORMAT" | "COMPLETED",
+  urls: {
+    transformedImageUrl?: string;
+    animatedVideoUrl?: string;
+    finalVideoUrl?: string;
+  } = {},
+  cost: number
+) {
+  const updateData: any = {
+    status,
+    progress,
+    currentStage,
+    updatedAt: new Date(),
+    cost, // Add cost tracking
+  };
+
+  if (urls.transformedImageUrl)
+    updateData.transformedImageUrl = urls.transformedImageUrl;
+  if (urls.animatedVideoUrl)
+    updateData.animatedVideoUrl = urls.animatedVideoUrl;
+  if (urls.finalVideoUrl) updateData.finalVideoUrl = urls.finalVideoUrl;
   if (status === "COMPLETED") updateData.completedAt = new Date();
 
   await prisma.contentJob.update({

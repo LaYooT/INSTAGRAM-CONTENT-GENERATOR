@@ -76,6 +76,7 @@ model ContentJob {
   progress          Int         @default(0)
   currentStage      ProcessingStage @default(TRANSFORM)
   errorMessage      String?
+  cost              Float       @default(0.0) // Cost in USD for this job
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
   completedAt       DateTime?

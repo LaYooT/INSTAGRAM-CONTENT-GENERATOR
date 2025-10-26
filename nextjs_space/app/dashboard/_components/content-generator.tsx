@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Session } from "next-auth";
 import { PhotoUpload } from "./photo-upload";
 import { ProcessingStatus } from "./processing-status";
@@ -20,6 +20,33 @@ interface ContentGeneratorProps {
 export function ContentGenerator({ session }: ContentGeneratorProps) {
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"create" | "history" | "settings" | "profile">("create");
+  const [budgetInfo, setBudgetInfo] = useState({ spent: 0, remaining: 20.0 });
+
+  const INITIAL_BUDGET = 20.0;
+
+  useEffect(() => {
+    const fetchBudget = async () => {
+      try {
+        const response = await fetch('/api/jobs');
+        if (response.ok) {
+          const jobs = await response.json();
+          const totalCost = jobs.reduce((sum: number, j: any) => sum + (j.cost || 0), 0);
+          setBudgetInfo({
+            spent: totalCost,
+            remaining: INITIAL_BUDGET - totalCost,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch budget:', error);
+      }
+    };
+
+    fetchBudget();
+    
+    // Refresh budget every 10 seconds
+    const interval = setInterval(fetchBudget, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   const pageVariants = {
     initial: { opacity: 0, x: -20 },
@@ -56,7 +83,18 @@ export function ContentGenerator({ session }: ContentGeneratorProps) {
                   {session.user?.name || "User"}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Budget: <span className="text-green-500 font-semibold">€19.87</span>
+                  Budget: <span className={`font-semibold ${
+                    budgetInfo.remaining > 10 ? 'text-green-500' : 
+                    budgetInfo.remaining > 5 ? 'text-yellow-500' : 
+                    'text-red-500'
+                  }`}>
+                    €{budgetInfo.remaining.toFixed(2)}
+                  </span>
+                  {budgetInfo.spent > 0 && (
+                    <span className="text-muted-foreground ml-1">
+                      / €{INITIAL_BUDGET.toFixed(2)}
+                    </span>
+                  )}
                 </p>
               </div>
             </div>
