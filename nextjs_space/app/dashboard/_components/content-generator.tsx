@@ -64,27 +64,27 @@ export function ContentGenerator({ session }: ContentGeneratorProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header - Minimal, clean */}
+      {/* Header - Minimal, clean - Fluid responsive */}
       <header className="sticky top-0 z-40 glass border-b border-border">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-fluid-container py-fluid-sm">
           <div className="flex items-center justify-between max-w-7xl mx-auto">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-                <Sparkles className="w-5 h-5 text-background" />
+            <div className="flex items-center gap-fluid-sm">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-primary to-secondary rounded-fluid-md flex items-center justify-center shadow-lg shadow-primary/20">
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-background" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-foreground">ReelGen AI</h1>
-                <p className="text-xs text-muted-foreground hidden sm:block">Create Viral Content</p>
+                <h1 className="text-fluid-lg font-bold text-foreground leading-fluid-tight">ReelGen AI</h1>
+                <p className="text-fluid-xs text-muted-foreground hidden sm:block leading-fluid-tight">Create Viral Content</p>
               </div>
             </div>
 
             {/* Desktop welcome message */}
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-fluid-sm">
               <div className="text-right">
-                <p className="text-sm font-medium text-foreground">
+                <p className="text-fluid-sm font-medium text-foreground leading-fluid-tight">
                   {session.user?.name || "User"}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-fluid-xs text-muted-foreground leading-fluid-tight">
                   Budget: <span className={`font-semibold ${
                     budgetInfo.remaining > 10 ? 'text-green-500' : 
                     budgetInfo.remaining > 5 ? 'text-yellow-500' : 
@@ -104,8 +104,8 @@ export function ContentGenerator({ session }: ContentGeneratorProps) {
         </div>
       </header>
 
-      {/* Main Content Area */}
-      <main className="container mx-auto px-4 py-6 md:py-8 md:pl-24">
+      {/* Main Content Area - Fluid responsive */}
+      <main className="container mx-auto px-fluid-container py-fluid-md md:py-fluid-lg pb-24 md:pb-fluid-xl">
         <div className="max-w-7xl mx-auto">
           <AnimatePresence mode="wait">
             {activeTab === "create" && (
@@ -117,17 +117,17 @@ export function ContentGenerator({ session }: ContentGeneratorProps) {
                 exit="exit"
                 transition={pageTransition}
               >
-                <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-fluid-md lg:gap-fluid-lg">
                   {/* Left Column - Upload and Processing */}
-                  <div className="space-y-6">
-                    <div className="glass rounded-2xl p-6 border border-border">
-                      <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 bg-primary/20 text-primary rounded-xl flex items-center justify-center">
-                          <Sparkles className="w-5 h-5" />
+                  <div className="space-y-fluid-md">
+                    <div className="glass rounded-fluid-lg p-fluid-md border border-border">
+                      <div className="flex items-center gap-fluid-sm mb-fluid-md">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/20 text-primary rounded-fluid-md flex items-center justify-center">
+                          <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
                         </div>
                         <div>
-                          <h2 className="text-xl font-bold text-foreground">Create Content</h2>
-                          <p className="text-sm text-muted-foreground">
+                          <h2 className="text-fluid-xl font-bold text-foreground leading-fluid-tight">Create Content</h2>
+                          <p className="text-fluid-sm text-muted-foreground leading-fluid-tight">
                             Transform photos into viral Reels
                           </p>
                         </div>
@@ -146,7 +146,7 @@ export function ContentGenerator({ session }: ContentGeneratorProps) {
                       <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="glass rounded-2xl p-6 border border-border"
+                        className="glass rounded-fluid-lg p-fluid-md border border-border"
                       >
                         <ProcessingStatus
                           jobId={currentJobId}
@@ -157,18 +157,18 @@ export function ContentGenerator({ session }: ContentGeneratorProps) {
                   </div>
 
                   {/* Right Column - Preview and Results */}
-                  <div className="space-y-6">
-                    <div className="glass rounded-2xl p-6 border border-border">
-                      <h3 className="text-lg font-bold text-foreground mb-4">
+                  <div className="space-y-fluid-md">
+                    <div className="glass rounded-fluid-lg p-fluid-md border border-border">
+                      <h3 className="text-fluid-lg font-bold text-foreground mb-fluid-md leading-fluid-tight">
                         Preview & Download
                       </h3>
                       {currentJobId ? (
                         <VideoPreview jobId={currentJobId} />
                       ) : (
-                        <div className="aspect-[9/16] max-w-xs mx-auto bg-muted/30 rounded-2xl border-2 border-dashed border-border flex items-center justify-center">
+                        <div className="aspect-[9/16] max-w-xs mx-auto bg-muted/30 rounded-fluid-lg border-2 border-dashed border-border flex items-center justify-center p-fluid-md">
                           <div className="text-center">
-                            <Play className="w-16 h-16 text-muted-foreground/40 mx-auto mb-4" />
-                            <p className="text-muted-foreground text-sm px-6">
+                            <Play className="w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground/40 mx-auto mb-fluid-sm" />
+                            <p className="text-muted-foreground text-fluid-sm px-fluid-sm leading-fluid-normal">
                               Your video will appear here
                             </p>
                           </div>
@@ -189,7 +189,7 @@ export function ContentGenerator({ session }: ContentGeneratorProps) {
                 exit="exit"
                 transition={pageTransition}
               >
-                <div className="glass rounded-2xl p-6 border border-border">
+                <div className="glass rounded-fluid-lg p-fluid-md border border-border">
                   <JobHistory onJobSelect={setCurrentJobId} />
                 </div>
               </motion.div>
@@ -230,7 +230,7 @@ export function ContentGenerator({ session }: ContentGeneratorProps) {
                 exit="exit"
                 transition={pageTransition}
               >
-                <div className="glass rounded-2xl p-6 border border-border">
+                <div className="glass rounded-fluid-lg p-fluid-md border border-border">
                   <AdminPanel session={session} />
                 </div>
               </motion.div>

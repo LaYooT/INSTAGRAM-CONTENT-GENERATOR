@@ -18,6 +18,10 @@ const config: Config = {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+        // Fluid border radius
+        'fluid-sm': 'var(--radius-sm)',
+        'fluid-md': 'var(--radius-md)',
+        'fluid-lg': 'var(--radius-lg)',
       },
       colors: {
         background: 'hsl(var(--background))',
@@ -61,6 +65,62 @@ const config: Config = {
           '5': 'hsl(var(--chart-5))',
         },
       },
+      // Fluid Typography System
+      fontSize: {
+        'fluid-xs': 'var(--font-size-xs)',
+        'fluid-sm': 'var(--font-size-sm)',
+        'fluid-base': 'var(--font-size-base)',
+        'fluid-lg': 'var(--font-size-lg)',
+        'fluid-xl': 'var(--font-size-xl)',
+        'fluid-2xl': 'var(--font-size-2xl)',
+        'fluid-3xl': 'var(--font-size-3xl)',
+        'fluid-4xl': 'var(--font-size-4xl)',
+      },
+      // Fluid Line Heights
+      lineHeight: {
+        'fluid-tight': 'var(--line-height-tight)',
+        'fluid-normal': 'var(--line-height-normal)',
+        'fluid-relaxed': 'var(--line-height-relaxed)',
+      },
+      // Fluid Spacing System
+      spacing: {
+        'fluid-xs': 'var(--space-xs)',
+        'fluid-sm': 'var(--space-sm)',
+        'fluid-md': 'var(--space-md)',
+        'fluid-lg': 'var(--space-lg)',
+        'fluid-xl': 'var(--space-xl)',
+        'fluid-2xl': 'var(--space-2xl)',
+        'fluid-3xl': 'var(--space-3xl)',
+      },
+      // Fluid Padding
+      padding: {
+        'fluid-xs': 'var(--space-xs)',
+        'fluid-sm': 'var(--space-sm)',
+        'fluid-md': 'var(--space-md)',
+        'fluid-lg': 'var(--space-lg)',
+        'fluid-xl': 'var(--space-xl)',
+        'fluid-2xl': 'var(--space-2xl)',
+        'fluid-3xl': 'var(--space-3xl)',
+        'fluid-container': 'var(--padding-container)',
+        'fluid-section': 'var(--padding-section)',
+      },
+      // Fluid Margin
+      margin: {
+        'fluid-xs': 'var(--space-xs)',
+        'fluid-sm': 'var(--space-sm)',
+        'fluid-md': 'var(--space-md)',
+        'fluid-lg': 'var(--space-lg)',
+        'fluid-xl': 'var(--space-xl)',
+        'fluid-2xl': 'var(--space-2xl)',
+        'fluid-3xl': 'var(--space-3xl)',
+      },
+      // Fluid Gap for Grids/Flex
+      gap: {
+        'fluid-xs': 'var(--space-xs)',
+        'fluid-sm': 'var(--gap-sm)',
+        'fluid-md': 'var(--gap-md)',
+        'fluid-lg': 'var(--gap-lg)',
+      },
       keyframes: {
         'accordion-down': {
           from: {
@@ -82,6 +142,15 @@ const config: Config = {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+      },
+      // Responsive container sizes
+      screens: {
+        'xs': '375px',
+        'sm': '640px',
+        'md': '768px',
+        'lg': '1024px',
+        'xl': '1280px',
+        '2xl': '1440px',
       },
     },
   },

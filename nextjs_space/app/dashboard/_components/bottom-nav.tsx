@@ -49,9 +49,9 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
 
   return (
     <>
-      {/* Mobile Bottom Navigation */}
+      {/* Mobile Bottom Navigation - Fluid responsive */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass border-t border-white/10 pb-safe">
-        <div className={cn("grid h-16", gridCols)}>
+        <div className={cn("grid", gridCols)} style={{ height: 'clamp(3.5rem, 4vw + 3rem, 4.5rem)' }}>
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -61,7 +61,7 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
                 key={item.id}
                 onClick={() => onTabChange(item.id)}
                 className={cn(
-                  "relative flex flex-col items-center justify-center gap-1 transition-smooth",
+                  "relative flex flex-col items-center justify-center gap-fluid-xs transition-smooth",
                   "touch-manipulation min-h-[44px] min-w-[44px]", // Accessibility: 44x44px touch target
                   isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 )}
@@ -72,7 +72,7 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
                 {isActive && (
                   <motion.div
                     layoutId="activeTab"
-                    className="absolute inset-0 bg-primary/10 rounded-lg"
+                    className="absolute inset-0 bg-primary/10 rounded-fluid-md"
                     initial={false}
                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                   />
@@ -87,13 +87,13 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
                   transition={{ type: "spring", stiffness: 400, damping: 17 }}
                   className="relative z-10"
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon style={{ width: 'clamp(1.125rem, 1vw + 1rem, 1.375rem)', height: 'clamp(1.125rem, 1vw + 1rem, 1.375rem)' }} />
                 </motion.div>
 
                 {/* Label */}
                 <span
                   className={cn(
-                    "relative z-10 text-xs font-medium transition-smooth",
+                    "relative z-10 text-fluid-xs font-medium transition-smooth leading-fluid-tight",
                     isActive && "font-semibold"
                   )}
                 >
@@ -115,8 +115,13 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
         </div>
       </nav>
 
-      {/* Desktop Side Navigation (Tablet+) */}
-      <nav className="hidden md:flex fixed left-4 top-1/2 -translate-y-1/2 z-50 flex-col gap-2 glass rounded-2xl p-3">
+      {/* Desktop Side Navigation (Tablet+) - Fluid responsive */}
+      <nav className="hidden md:flex fixed z-50 flex-col gap-fluid-sm glass rounded-fluid-lg p-fluid-sm" 
+           style={{ 
+             left: 'clamp(0.5rem, 1vw, 1.5rem)',
+             top: '50%',
+             transform: 'translateY(-50%)'
+           }}>
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -126,23 +131,27 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
               key={item.id}
               onClick={() => onTabChange(item.id)}
               className={cn(
-                "relative flex items-center justify-center w-12 h-12 rounded-xl transition-smooth",
+                "relative flex items-center justify-center rounded-fluid-md transition-smooth",
                 "min-h-[44px] min-w-[44px]", // Accessibility: 44x44px touch target
                 isActive
                   ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted"
               )}
+              style={{
+                width: 'clamp(2.75rem, 3vw + 2rem, 3.5rem)',
+                height: 'clamp(2.75rem, 3vw + 2rem, 3.5rem)'
+              }}
               aria-label={item.label}
               aria-current={isActive ? "page" : undefined}
               title={item.label}
             >
-              <Icon className="w-5 h-5" />
+              <Icon style={{ width: 'clamp(1.125rem, 1.2vw + 0.8rem, 1.5rem)', height: 'clamp(1.125rem, 1.2vw + 0.8rem, 1.5rem)' }} />
 
               {/* Desktop tooltip */}
               <div
                 className={cn(
-                  "absolute left-full ml-3 px-3 py-1.5 bg-card border border-border rounded-lg",
-                  "text-sm font-medium whitespace-nowrap pointer-events-none",
+                  "absolute left-full ml-fluid-sm px-fluid-sm py-fluid-xs bg-card border border-border rounded-fluid-md",
+                  "text-fluid-sm font-medium whitespace-nowrap pointer-events-none",
                   "opacity-0 group-hover:opacity-100 transition-opacity"
                 )}
               >
