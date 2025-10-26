@@ -1,89 +1,55 @@
+/**
+ * Test minimal FAL.ai avec dotenv
+ */
+
+// IMPORTANT: Charger dotenv EN PREMIER
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 import { fal } from '@fal-ai/client';
-import * as dotenv from 'dotenv';
-
-dotenv.config();
 
 const FAL_API_KEY = process.env.FAL_API_KEY || '';
 
-// Initialize FAL client
+console.log('=== Test FAL.ai avec dotenv ===\n');
+
+console.log('1. Clé API chargée:', !!FAL_API_KEY);
+console.log('2. Longueur:', FAL_API_KEY.length);
+console.log('3. Format:', FAL_API_KEY.includes(':') ? 'KEY:SECRET ✓' : 'KEY');
+console.log('');
+
+if (!FAL_API_KEY) {
+  console.error('❌ Clé API non trouvée!');
+  process.exit(1);
+}
+
+// Configuration
 fal.config({
   credentials: FAL_API_KEY,
 });
 
-async function testMinimalImageToImage() {
-  console.log('Testing FAL.ai image-to-image with minimal parameters...');
-  
-  // Using a public test image
-  const testImageUrl = 'https://i.pinimg.com/736x/4a/6d/d9/4a6dd939ab313b85bd0ad41339ce28f5.jpg';
-  const testPrompt = 'A beautiful sunset landscape';
-  
+console.log('4. Test transformation d\'image...\n');
+
+async function test() {
   try {
-    console.log('Test 1: Only required parameters');
-    const result1 = await fal.subscribe('fal-ai/flux/dev/image-to-image', {
+    const result = await fal.subscribe('fal-ai/flux/dev/image-to-image', {
       input: {
-        image_url: testImageUrl,
-        prompt: testPrompt,
-      },
-      logs: true,
-    });
-    console.log('✅ Test 1 passed:', result1);
-  } catch (error: any) {
-    console.error('❌ Test 1 failed:', error.message);
-    if (error.body) {
-      console.error('Error body:', JSON.stringify(error.body, null, 2));
-    }
-  }
-  
-  try {
-    console.log('\nTest 2: With optional parameters (current setup)');
-    const result2 = await fal.subscribe('fal-ai/flux/dev/image-to-image', {
-      input: {
-        prompt: testPrompt,
-        image_url: testImageUrl,
+        prompt: 'a white cat',
+        image_url: 'https://storage.googleapis.com/falserverless/model_tests/flux/image-to-image/ski-goat.png',
         strength: 0.8,
-        num_inference_steps: 40,
-        guidance_scale: 3.5,
-        num_images: 1,
-        output_format: 'jpeg',
-      },
-      logs: true,
-    });
-    console.log('✅ Test 2 passed:', result2);
-  } catch (error: any) {
-    console.error('❌ Test 2 failed:', error.message);
-    if (error.body) {
-      console.error('Error body:', JSON.stringify(error.body, null, 2));
-    }
-  }
-  
-  try {
-    console.log('\nTest 3: Different parameter order');
-    const result3 = await fal.subscribe('fal-ai/flux/dev/image-to-image', {
-      input: {
-        image_url: testImageUrl,
-        prompt: testPrompt,
-        strength: 0.8,
-        num_inference_steps: 40,
+        num_inference_steps: 28,
         guidance_scale: 3.5,
       },
-      logs: true,
+      logs: true
     });
-    console.log('✅ Test 3 passed:', result3);
+
+    console.log('\n✅ SUCCÈS! API FAL.ai fonctionne correctement!');
+    console.log('Image générée:', (result as any).data.images[0].url);
+    
   } catch (error: any) {
-    console.error('❌ Test 3 failed:', error.message);
-    if (error.body) {
-      console.error('Error body:', JSON.stringify(error.body, null, 2));
-    }
+    console.error('\n❌ ÉCHEC:', error.message);
+    console.error('Status:', error.status);
+    console.error('Body:', error.body);
   }
 }
 
-testMinimalImageToImage()
-  .then(() => {
-    console.log('\n✅ All tests completed');
-    process.exit(0);
-  })
-  .catch((error) => {
-    console.error('\n❌ Test suite failed:', error);
-    process.exit(1);
-  });
+test();
