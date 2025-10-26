@@ -101,6 +101,15 @@ export async function transformImageWithAI(
     return imageUrlResult;
   } catch (error) {
     console.error('FAL.ai image transformation error:', error);
+    
+    // Log detailed error information
+    if (error && typeof error === 'object') {
+      console.error('Error details:', JSON.stringify(error, null, 2));
+      if ('body' in error) {
+        console.error('Error body:', JSON.stringify((error as any).body, null, 2));
+      }
+    }
+    
     throw new Error(
       `FAL.ai API error: ${error instanceof Error ? error.message : 'Unknown error'}`
     );

@@ -8,9 +8,7 @@ import {
   transformImageWithAI,
   generateVideoFromImage,
   upscaleImage,
-  uploadToFalStorage,
 } from './fal';
-import { downloadFileAsBuffer } from './s3';
 
 interface GenerateImageOptions {
   sourceImageUrl: string;
@@ -41,14 +39,13 @@ export async function generateTransformedImage(
   });
 
   try {
-    // Download image from S3 and upload to FAL.ai storage
+    // Get a signed URL from S3 for FAL.ai to access
     let imageUrl = sourceImageUrl;
     if (sourceImageUrl.startsWith('uploads/')) {
-      console.log('Downloading image from S3...');
-      const imageBuffer = await downloadFileAsBuffer(sourceImageUrl);
-      console.log('Uploading to FAL.ai storage...');
-      imageUrl = await uploadToFalStorage(imageBuffer);
-      console.log('FAL.ai URL:', imageUrl);
+      console.log('Generating signed URL from S3...');
+      const { downloadFile } = await import('./s3');
+      imageUrl = await downloadFile(sourceImageUrl);
+      console.log('Signed S3 URL generated:', imageUrl);
     }
 
     // Optional: Upscale for better quality (adds ~$0.001 cost)
@@ -88,25 +85,25 @@ export async function generateAnimatedVideo(
   });
 
   try {
-    // Ensure we have a FAL.ai compatible URL
+    // Get a publicly accessible URL
     let videoSourceUrl = imageUrl;
     
-    // If it's an S3 key, download and re-upload to FAL.ai storage
+    // If it's an S3 key, get a signed URL
     if (imageUrl.startsWith('uploads/')) {
-      console.log('Downloading image from S3...');
-      const imageBuffer = await downloadFileAsBuffer(imageUrl);
-      console.log('Uploading to FAL.ai storage...');
-      videoSourceUrl = await uploadToFalStorage(imageBuffer);
-      console.log('FAL.ai URL:', videoSourceUrl);
+      console.log('Generating signed URL from S3...');
+      const { downloadFile } = await import('./s3');
+      videoSourceUrl = await downloadFile(imageUrl);
+      console.log('Signed S3 URL generated:', videoSourceUrl);
     }
     // If it's already a FAL.ai URL (from previous transformation), use it directly
-    else if (!imageUrl.startsWith('https://')) {
-      // If it's a relative path or unknown format, try to download it
-      console.log('Downloading image from unknown source...');
-      const imageBuffer = await downloadFileAsBuffer(imageUrl);
-      console.log('Uploading to FAL.ai storage...');
-      videoSourceUrl = await uploadToFalStorage(imageBuffer);
-      console.log('FAL.ai URL:', videoSourceUrl);
+    else if (imageUrl.startsWith('https://fal.media') || imageUrl.startsWith('https://v3.fal.media') || imageUrl.startsWith('https://v3b.fal.media')) {
+      console.log('Using FAL.ai URL directly:', imageUrl);
+      videoSourceUrl = imageUrl;
+    }
+    // If it's any other HTTPS URL, use it directly (FAL.ai can access public URLs)
+    else if (imageUrl.startsWith('https://')) {
+      console.log('Using public URL directly:', imageUrl);
+      videoSourceUrl = imageUrl;
     }
 
     // Generate video with FAL.ai
