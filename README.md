@@ -18,11 +18,14 @@ Application complète de génération de contenu viral pour Instagram Reels avec
 
 ### 🤖 Génération IA avec FAL.ai
 
+**⚠️ Important :** Cette application utilise le SDK officiel `@fal-ai/serverless-client` pour une intégration fiable et optimisée avec FAL.ai.
+
 #### Images (Transformation)
 - Modèle : **Flux Dev** (haute qualité)
 - Input : Photo originale + prompt
 - Output : Image transformée 1080x1920
 - Coût : ~$0.025 par image
+- SDK : `fal.subscribe('fal-ai/flux/dev/image-to-image')`
 
 #### Vidéos (Animation)
 - Modèle : **Luma Dream Machine**
@@ -30,6 +33,7 @@ Application complète de génération de contenu viral pour Instagram Reels avec
 - Output : Vidéo animée format 9:16 (Instagram Reels)
 - Durée : 5 secondes
 - Coût : ~$0.05 par vidéo
+- SDK : `fal.subscribe('fal-ai/luma-dream-machine/image-to-video')`
 
 ### 💬 Amélioration de Prompts
 - Utilise Abacus.AI LLM APIs
