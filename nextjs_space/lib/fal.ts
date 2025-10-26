@@ -8,6 +8,7 @@
  */
 
 import { fal } from '@fal-ai/client';
+import sharp from 'sharp';
 
 const FAL_API_KEY = process.env.FAL_API_KEY || '';
 
@@ -63,6 +64,66 @@ export async function uploadToFalStorage(imageBuffer: Buffer): Promise<string> {
     
     throw new Error(
       `Failed to upload to FAL.ai storage: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`
+    );
+  }
+}
+
+/**
+ * Resize an image to fit within FAL.ai video generation limits (1920x1920)
+ * Downloads the image, resizes it while maintaining aspect ratio, and re-uploads
+ */
+export async function resizeImageForVideo(imageUrl: string): Promise<string> {
+  const MAX_DIMENSION = 1920;
+  
+  console.log('Checking image dimensions for video generation:', imageUrl);
+  
+  try {
+    // Download the image
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image: ${response.statusText}`);
+    }
+    
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    
+    // Get image metadata to check dimensions
+    const metadata = await sharp(buffer).metadata();
+    const { width = 0, height = 0 } = metadata;
+    
+    console.log(`Original image dimensions: ${width}x${height}`);
+    
+    // Check if resizing is needed
+    if (width <= MAX_DIMENSION && height <= MAX_DIMENSION) {
+      console.log('✅ Image dimensions are within limits, no resizing needed');
+      return imageUrl;
+    }
+    
+    console.log(`⚠️ Image exceeds ${MAX_DIMENSION}x${MAX_DIMENSION}, resizing...`);
+    
+    // Resize image to fit within MAX_DIMENSION while maintaining aspect ratio
+    const resizedBuffer = await sharp(buffer)
+      .resize(MAX_DIMENSION, MAX_DIMENSION, {
+        fit: 'inside', // Maintains aspect ratio
+        withoutEnlargement: true, // Don't upscale smaller images
+      })
+      .jpeg({ quality: 90 }) // High quality JPEG output
+      .toBuffer();
+    
+    const resizedMetadata = await sharp(resizedBuffer).metadata();
+    console.log(`Resized dimensions: ${resizedMetadata.width}x${resizedMetadata.height}`);
+    
+    // Upload resized image to FAL.ai storage
+    const resizedUrl = await uploadToFalStorage(resizedBuffer);
+    console.log('✅ Resized image uploaded:', resizedUrl);
+    
+    return resizedUrl;
+  } catch (error) {
+    console.error('Failed to resize image:', error);
+    throw new Error(
+      `Failed to resize image: ${
         error instanceof Error ? error.message : 'Unknown error'
       }`
     );
@@ -149,9 +210,12 @@ export async function generateVideoFromImage(
   });
 
   try {
+    // Resize image to fit within FAL.ai limits (1920x1920)
+    const resizedImageUrl = await resizeImageForVideo(imageUrl);
+    
     const input = {
       prompt: prompt,
-      image_url: imageUrl,
+      image_url: resizedImageUrl,
       aspect_ratio: '9:16' as const, // Instagram Reels format (type-safe literal)
       loop: false,
     };
