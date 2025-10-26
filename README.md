@@ -16,20 +16,20 @@ Application complète de génération de contenu viral pour Instagram Reels avec
 - Taille max : 10 MB par image
 - URLs sécurisées avec expiration
 
-### 🤖 Génération IA avec Runware.ai
+### 🤖 Génération IA avec FAL.ai
 
 #### Images (Transformation)
-- Modèle : **Flux Schnell** (rapide et économique)
+- Modèle : **Flux Dev** (haute qualité)
 - Input : Photo originale + prompt
 - Output : Image transformée 1080x1920
-- Coût : ~$0.0013 par image
+- Coût : ~$0.025 par image
 
 #### Vidéos (Animation)
-- Modèle : **Hailuo AI v2**
+- Modèle : **Luma Dream Machine**
 - Input : Image + prompt vidéo
-- Output : Vidéo animée 1080x1920 (format Instagram Reels)
+- Output : Vidéo animée format 9:16 (Instagram Reels)
 - Durée : 5 secondes
-- Coût : ~$0.0668 par vidéo
+- Coût : ~$0.05 par vidéo
 
 ### 💬 Amélioration de Prompts
 - Utilise Abacus.AI LLM APIs
@@ -49,27 +49,27 @@ Application complète de génération de contenu viral pour Instagram Reels avec
 ## 💰 Coûts Estimés
 
 ### Par Génération Complète
-- Image transformée : $0.0013
-- Vidéo (5 sec) : $0.0668
-- **Total : ~$0.07 par Reel**
+- Image transformée : $0.025
+- Vidéo (5 sec) : $0.05
+- **Total : ~$0.075 par Reel**
 
 ### Budget Mensuel 20€
 Avec votre budget de 20€/mois, vous pouvez générer :
-- **~285 Reels complets** (image + vidéo)
-- OU ~16,500 images seules
-- OU ~322 vidéos seules
+- **~266 Reels complets** (image + vidéo)
+- OU ~800 images seules
+- OU ~400 vidéos seules
 
 ### Exemple d'Utilisation
-- 10 Reels/jour = 300/mois = ~$21
-- 5 Reels/jour = 150/mois = ~$10.50
-- 3 Reels/jour = 90/mois = ~$6.30
+- 10 Reels/jour = 300/mois = ~$22.50
+- 8 Reels/jour = 240/mois = ~$18
+- 5 Reels/jour = 150/mois = ~$11.25
 
 ## 🚀 Démarrage
 
 ### Prérequis
 - Node.js 18+
 - Yarn
-- Compte Runware.ai (clé API configurée ✅)
+- Compte FAL.ai (clé API configurée ✅)
 
 ### Installation
 ```bash
@@ -82,7 +82,7 @@ Les variables d'environnement sont déjà configurées dans `.env` :
 - ✅ `DATABASE_URL` - PostgreSQL
 - ✅ `NEXTAUTH_SECRET` - Auth sécurisée
 - ✅ `AWS_BUCKET_NAME` - Stockage cloud
-- ✅ `RUNWARE_API_KEY` - Génération IA
+- ✅ `FAL_API_KEY` - Génération IA
 - ✅ `ABACUSAI_API_KEY` - Amélioration prompts
 
 ### Développement
@@ -139,7 +139,7 @@ instagram_content_generator/
 │   │   ├── auth/               # Pages auth
 │   │   └── page.tsx            # Landing page
 │   ├── lib/
-│   │   ├── runware.ts          # 🆕 Intégration Runware API
+│   │   ├── fal.ts              # 🆕 Intégration FAL.ai API
 │   │   ├── media-generator.ts  # 🆕 Génération média
 │   │   ├── s3.ts               # Gestion S3
 │   │   ├── auth.ts             # Configuration auth
@@ -200,9 +200,9 @@ model ContentJob {
   originalImageUrl     String   // S3 key
   imagePrompt          String
   videoPrompt          String
-  transformedImageUrl  String?  // Runware URL
-  animatedVideoUrl     String?  // Runware URL
-  finalVideoUrl        String?  // Runware URL
+  transformedImageUrl  String?  // FAL.ai URL
+  animatedVideoUrl     String?  // FAL.ai URL
+  finalVideoUrl        String?  // FAL.ai URL
   status               String   // PENDING|PROCESSING|COMPLETED|FAILED
   progress             Int      // 0-100
   currentStage         String   // TRANSFORM|ANIMATE|FORMAT|COMPLETED
@@ -269,8 +269,8 @@ Les logs sont disponibles dans la console :
 
 ### Erreurs Courantes
 
-#### "Runware API key not configured"
-- Vérifier que `RUNWARE_API_KEY` est dans `.env`
+#### "FAL.ai API key not configured"
+- Vérifier que `FAL_API_KEY` est dans `.env`
 - Redémarrer le serveur
 
 #### "Failed to upload file"
@@ -279,7 +279,7 @@ Les logs sont disponibles dans la console :
 
 #### "Processing failed"
 - Vérifier les logs console
-- Vérifier le crédit Runware
+- Vérifier le crédit FAL.ai
 - Vérifier la connectivité réseau
 
 ## 📈 Monitoring
@@ -290,37 +290,37 @@ Les logs sont disponibles dans la console :
 - Taux de succès des jobs
 - Temps moyen de traitement
 
-### Runware Dashboard
-Consultez votre usage sur : https://my.runware.ai/
+### FAL.ai Dashboard
+Consultez votre usage sur : https://fal.ai/dashboard
 - Crédits restants
 - Historique des requêtes
 - Statistiques de coûts
 
 ## 🎨 Personnalisation
 
-### Modèles Runware
-Vous pouvez changer les modèles dans `lib/runware.ts` :
+### Modèles FAL.ai
+Vous pouvez changer les modèles dans `lib/fal.ts` :
 
 ```typescript
 // Images
-model: 'runware:100@1'  // Flux Schnell (défaut)
-// Autres options : SDXL, Flux Pro, etc.
+'/fal-ai/flux/dev/image-to-image'  // Flux Dev (défaut)
+// Autres options : flux-pro, flux/schnell, etc.
 
 // Vidéos
-model: 'hailuo:v2@1'    // Hailuo AI (défaut)
-// Autres options : Kling AI, etc.
+'/fal-ai/luma-dream-machine/image-to-video'  // Luma (défaut)
+// Autres options : minimax/video-01, etc.
 ```
 
 ### Durée Vidéo
-Modifier dans `lib/runware.ts` :
+Modifier dans `lib/fal.ts` :
 ```typescript
 duration: 5  // secondes (défaut)
-// Max : 10 secondes
+// Max : variable selon le modèle
 ```
 
 ### Résolution
 Actuellement : 1080x1920 (Instagram Reels)
-Modifiable dans `lib/runware.ts`
+Modifiable dans `lib/fal.ts`
 
 ## 🚢 Déploiement
 
@@ -340,15 +340,15 @@ Modifiable dans `lib/runware.ts`
 - `AWS_BUCKET_NAME`
 - `AWS_REGION`
 - `AWS_PROFILE`
-- `RUNWARE_API_KEY`
+- `FAL_API_KEY`
 - `ABACUSAI_API_KEY`
 
 ## 🤝 Support
 
-### Runware.ai
-- Documentation : https://runware.ai/docs
-- Support : https://my.runware.ai/support
-- Essai gratuit : ~1000 images
+### FAL.ai
+- Documentation : https://fal.ai/docs
+- Support : https://fal.ai/dashboard
+- Crédits gratuits pour tester
 
 ### Problèmes avec l'App
 - Vérifier les logs console
@@ -357,13 +357,16 @@ Modifiable dans `lib/runware.ts`
 
 ## 📝 Changelog
 
-### v2.0 (Current) - Runware.ai Integration ✅
-- ✅ Intégration complète Runware.ai
-- ✅ Génération réelle d'images (Flux Schnell)
-- ✅ Génération réelle de vidéos (Hailuo AI)
+### v3.0 (Current) - FAL.ai Integration ✅
+- ✅ Migration vers FAL.ai (plus stable)
+- ✅ Génération d'images haute qualité (Flux Dev)
+- ✅ Génération de vidéos (Luma Dream Machine)
 - ✅ Amélioration de prompts avec LLM
 - ✅ Format Instagram Reels natif
-- ✅ Coûts optimisés (7-8x moins cher)
+- ✅ Coûts compétitifs et qualité supérieure
+
+### v2.0 - Runware.ai Integration
+- Première intégration IA pour génération réelle
 
 ### v1.0 - Initial Release
 - Interface utilisateur complète
@@ -399,8 +402,8 @@ Modifiable dans `lib/runware.ts`
 ### Optimisation Budget
 - Utilisez l'amélioration de prompts pour éviter les ratés
 - Testez avec 1-2 générations avant batch
-- Surveillez vos crédits Runware
+- Surveillez vos crédits FAL.ai
 
 ---
 
-**Made with ❤️ using Runware.ai, Next.js, and Abacus.AI**
+**Made with ❤️ using FAL.ai, Next.js, and Abacus.AI**

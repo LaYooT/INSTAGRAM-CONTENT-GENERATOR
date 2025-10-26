@@ -1,14 +1,14 @@
 
 /**
  * Media Generator Service
- * Handles AI image transformation and video generation using Runway ML
+ * Handles AI image transformation and video generation using FAL.ai
  */
 
 import {
   transformImageWithAI,
   generateVideoFromImage,
   upscaleImage,
-} from './runway';
+} from './fal';
 import { downloadFile } from './s3';
 
 interface GenerateImageOptions {
@@ -26,7 +26,7 @@ interface GenerateVideoOptions {
 
 /**
  * Generate a transformed image using AI
- * This uses Runway ML's Gen-4 Image Turbo model for image generation
+ * This uses FAL.ai's Flux Dev model for high-quality image generation
  */
 export async function generateTransformedImage(
   options: GenerateImageOptions
@@ -69,7 +69,7 @@ export async function generateTransformedImage(
 
 /**
  * Generate an animated video from an image using AI
- * This uses Runway ML's Gen-4 Turbo model for video generation
+ * This uses FAL.ai's Luma Dream Machine for video generation
  */
 export async function generateAnimatedVideo(
   options: GenerateVideoOptions
@@ -110,12 +110,12 @@ export async function generateAnimatedVideo(
 
 /**
  * Format video for Instagram Reels (9:16 aspect ratio, 1080x1920)
- * Runway ML already outputs in 1080x1920, so we just validate
+ * FAL.ai already outputs in 9:16 format, so we just validate
  */
 export async function formatForInstagram(videoUrl: string): Promise<string> {
   console.log('Formatting video for Instagram:', videoUrl);
 
-  // Runway ML videos are already in 1080x1920 (Instagram Reels format)
+  // FAL.ai videos are already in 9:16 aspect ratio (Instagram Reels format)
   // No additional processing needed
 
   await delay(500); // Small delay for consistency
@@ -128,9 +128,9 @@ export async function formatForInstagram(videoUrl: string): Promise<string> {
  * Get cost estimate for a generation job
  */
 export function estimateJobCost(includeVideo: boolean = true): number {
-  // Image transformation: ~$0.005
-  // Video generation (5 sec): ~$0.05
-  const imageCost = 0.005;
+  // Image transformation (Flux Dev): ~$0.025
+  // Video generation (Luma): ~$0.05
+  const imageCost = 0.025;
   const videoCost = 0.05;
 
   return includeVideo ? imageCost + videoCost : imageCost;

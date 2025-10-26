@@ -10,7 +10,7 @@
 - ✅ **Production ready** : Prêt pour déploiement
 
 ### Intégrations
-- ✅ Runware.ai configuré
+- ✅ FAL.ai configuré
 - ✅ Base de données PostgreSQL
 - ✅ Stockage cloud AWS S3
 - ✅ LLM APIs Abacus.AI
@@ -68,7 +68,7 @@ AWS_REGION=us-west-2
 AWS_BUCKET_NAME=abacusai-apps-aec1f5057b2188913e9c0913-us-west-2
 AWS_FOLDER_PREFIX=7587/
 
-RUNWARE_API_KEY=key_6169e674188eae8e614c341f51e0d2b9996b9f3dacc4b1093813256a66c1f056903e42dea00b0388709033f00d37917cbf0dd1c389c4a4eb2f2d62dcddac30c6
+FAL_API_KEY=945471d2-4555-4e93-8c81-19a8bf920237:c92641b978c2606eafc7af45ebad8d46
 
 ABACUSAI_API_KEY=b96b7daae80c40e899b3b4adad9adfcb
 ```
@@ -117,7 +117,7 @@ NEXTAUTH_URL=https://your-actual-domain.com
 ```
 
 #### 3. Vérifier les Clés API
-- ✅ `RUNWARE_API_KEY` : Déjà configurée
+- ✅ `FAL_API_KEY` : Déjà configurée
 - ✅ `ABACUSAI_API_KEY` : Déjà configurée
 - ✅ `AWS_*` : Déjà configurées
 
@@ -146,7 +146,7 @@ yarn prisma migrate deploy
 - [x] Variables d'environnement configurées
 - [x] Base de données connectée
 - [x] Stockage S3 configuré
-- [x] APIs intégrées (Runware, Abacus.AI)
+- [x] APIs intégrées (FAL.ai, Abacus.AI)
 - [x] Authentification configurée
 
 ### Tests ✅
@@ -187,7 +187,7 @@ Devrait retourner HTTP 200
 4. Télécharger le résultat
 
 ### 4. Vérifier les Coûts
-- Aller sur https://my.runware.ai/
+- Aller sur https://fal.ai/dashboard
 - Vérifier les crédits utilisés
 - Surveiller les coûts
 
@@ -198,8 +198,8 @@ Devrait retourner HTTP 200
 - Voir les erreurs en temps réel
 - Alertes automatiques
 
-### Runware Dashboard
-- https://my.runware.ai/
+### FAL.ai Dashboard
+- https://fal.ai/dashboard
 - Usage quotidien/mensuel
 - Coûts par API call
 - Historique des requêtes
@@ -224,8 +224,8 @@ yarn tsc --noEmit
 
 ### Runtime Errors
 
-#### "Runware API key not configured"
-- Vérifier `RUNWARE_API_KEY` dans env vars
+#### "FAL.ai API key not configured"
+- Vérifier `FAL_API_KEY` dans env vars
 - Redéployer
 
 #### "Database connection failed"
@@ -285,10 +285,10 @@ Sur Vercel/Netlify :
 
 ### APIs
 
-**Runware.ai**
+**FAL.ai**
 - Pay-as-you-go
-- ~$0.07 par Reel complet
-- Budget 20€ = ~285 Reels/mois
+- ~$0.075 par Reel complet
+- Budget 20€ = ~266 Reels/mois
 
 **Autres**
 - PostgreSQL : Déjà inclus
@@ -304,7 +304,7 @@ Sur Vercel/Netlify :
 - Si besoin, migrer vers un plan supérieur
 
 **APIs**
-- Runware.ai scale automatiquement
+- FAL.ai scale automatiquement
 - Ajouter des crédits selon besoin
 
 **Storage**
