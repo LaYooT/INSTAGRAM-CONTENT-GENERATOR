@@ -1,14 +1,14 @@
 
 /**
  * Media Generator Service
- * Handles AI image transformation and video generation using Runware.ai
+ * Handles AI image transformation and video generation using Runway ML
  */
 
 import {
   transformImageWithAI,
   generateVideoFromImage,
   upscaleImage,
-} from './runware';
+} from './runway';
 import { downloadFile } from './s3';
 
 interface GenerateImageOptions {
@@ -26,7 +26,7 @@ interface GenerateVideoOptions {
 
 /**
  * Generate a transformed image using AI
- * This uses Runware's image-to-image transformation with Flux model
+ * This uses Runway ML's Gen-4 Image Turbo model for image generation
  */
 export async function generateTransformedImage(
   options: GenerateImageOptions
@@ -69,7 +69,7 @@ export async function generateTransformedImage(
 
 /**
  * Generate an animated video from an image using AI
- * This uses Runware's Hailuo AI model for video generation
+ * This uses Runway ML's Gen-4 Turbo model for video generation
  */
 export async function generateAnimatedVideo(
   options: GenerateVideoOptions
@@ -89,7 +89,7 @@ export async function generateAnimatedVideo(
       videoSourceUrl = await downloadFile(imageUrl);
     }
 
-    // Generate video with Runware AI
+    // Generate video with Runway ML AI
     const videoUrl = await generateVideoFromImage(
       videoSourceUrl,
       prompt,
@@ -110,12 +110,12 @@ export async function generateAnimatedVideo(
 
 /**
  * Format video for Instagram Reels (9:16 aspect ratio, 1080x1920)
- * Runware already outputs in 1080x1920, so we just validate
+ * Runway ML already outputs in 1080x1920, so we just validate
  */
 export async function formatForInstagram(videoUrl: string): Promise<string> {
   console.log('Formatting video for Instagram:', videoUrl);
 
-  // Runware videos are already in 1080x1920 (Instagram Reels format)
+  // Runway ML videos are already in 1080x1920 (Instagram Reels format)
   // No additional processing needed
 
   await delay(500); // Small delay for consistency
@@ -128,10 +128,10 @@ export async function formatForInstagram(videoUrl: string): Promise<string> {
  * Get cost estimate for a generation job
  */
 export function estimateJobCost(includeVideo: boolean = true): number {
-  // Image transformation: ~$0.0013
-  // Video generation (5 sec): ~$0.0668
-  const imageCost = 0.0013;
-  const videoCost = 0.0668;
+  // Image transformation: ~$0.005
+  // Video generation (5 sec): ~$0.05
+  const imageCost = 0.005;
+  const videoCost = 0.05;
 
   return includeVideo ? imageCost + videoCost : imageCost;
 }
