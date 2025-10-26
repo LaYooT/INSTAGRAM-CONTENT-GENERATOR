@@ -82,8 +82,23 @@ model ContentJob {
   completedAt       DateTime?
 
   user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  variations        JobVariation[]
 
   @@map("content_jobs")
+}
+
+model JobVariation {
+  id                String      @id @default(cuid())
+  jobId             String
+  videoUrl          String
+  thumbnailUrl      String?
+  isFavorite        Boolean     @default(false)
+  cost              Float       @default(0.0)
+  createdAt         DateTime    @default(now())
+
+  job               ContentJob  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@map("job_variations")
 }
 
 enum JobStatus {

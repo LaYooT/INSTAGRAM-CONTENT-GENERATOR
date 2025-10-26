@@ -1,19 +1,21 @@
 
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Download, 
-  Play, 
-  Pause, 
-  RotateCcw, 
-  Volume2, 
-  VolumeX,
-  Loader2
+  Loader2,
+  RefreshCw,
+  Sparkles,
+  ImageIcon,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { AdvancedVideoPlayer } from "./advanced-video-player";
+import { BeforeAfterComparison } from "./before-after-comparison";
+import { VariationsGallery } from "./variations-gallery";
 
 interface VideoPreviewProps {
   jobId: string;
@@ -23,35 +25,33 @@ interface JobData {
   id: string;
   status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
   finalVideoUrl?: string;
+  originalImageUrl?: string;
+  transformedImageUrl?: string;
   progress: number;
   currentStage: string;
 }
 
+interface Variation {
+  id: string;
+  videoUrl: string;
+  thumbnailUrl: string;
+  isFavorite: boolean;
+  createdAt: string;
+}
+
 export function VideoPreview({ jobId }: VideoPreviewProps) {
   const [jobData, setJobData] = useState<JobData | null>(null);
+  const [variations, setVariations] = useState<Variation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const [regenerating, setRegenerating] = useState(false);
+  const [generatingVariations, setGeneratingVariations] = useState(false);
+  const [selectedVariationId, setSelectedVariationId] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchJobData = async () => {
-      try {
-        const response = await fetch(`/api/jobs/${jobId}`);
-        if (response.ok) {
-          const data = await response.json();
-          setJobData(data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch job data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchJobData();
+    fetchVariations();
     
     // Poll for updates if not completed
     const interval = setInterval(() => {
@@ -61,31 +61,91 @@ export function VideoPreview({ jobId }: VideoPreviewProps) {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [jobId, jobData?.status]);
+  }, [jobId]);
 
-  const handlePlayPause = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play();
+  const fetchJobData = async () => {
+    try {
+      const response = await fetch(`/api/jobs/${jobId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setJobData(data);
       }
-      setIsPlaying(!isPlaying);
+    } catch (error) {
+      console.error('Failed to fetch job data:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleRestart = () => {
-    if (videoRef.current) {
-      videoRef.current.currentTime = 0;
-      videoRef.current.play();
-      setIsPlaying(true);
+  const fetchVariations = async () => {
+    try {
+      const response = await fetch(`/api/jobs/${jobId}/variations`);
+      if (response.ok) {
+        const data = await response.json();
+        setVariations(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch variations:', error);
     }
   };
 
-  const handleMuteToggle = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
+  const handleRegenerate = async () => {
+    setRegenerating(true);
+    try {
+      const response = await fetch(`/api/jobs/${jobId}/regenerate`, {
+        method: 'POST',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast({
+          title: "Régénération réussie !",
+          description: "Une nouvelle variation a été créée.",
+        });
+        // Refresh variations
+        fetchVariations();
+      } else {
+        throw new Error('Regeneration failed');
+      }
+    } catch (error) {
+      toast({
+        title: "Échec de la régénération",
+        description: "Impossible de régénérer la vidéo. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    } finally {
+      setRegenerating(false);
+    }
+  };
+
+  const handleGenerateVariations = async () => {
+    setGeneratingVariations(true);
+    try {
+      const response = await fetch(`/api/jobs/${jobId}/generate-variations`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ count: 3 }), // Generate 3 variations
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast({
+          title: "Variations créées !",
+          description: `${data.count} nouvelles variations ont été générées.`,
+        });
+        // Refresh variations
+        fetchVariations();
+      } else {
+        throw new Error('Variation generation failed');
+      }
+    } catch (error) {
+      toast({
+        title: "Échec de la génération",
+        description: "Impossible de générer les variations. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    } finally {
+      setGeneratingVariations(false);
     }
   };
 
@@ -107,16 +167,16 @@ export function VideoPreview({ jobId }: VideoPreviewProps) {
         document.body.removeChild(a);
         
         toast({
-          title: "Download started",
-          description: "Your Instagram Reel is being downloaded.",
+          title: "Téléchargement démarré",
+          description: "Votre Instagram Reel est en cours de téléchargement.",
         });
       } else {
         throw new Error('Download failed');
       }
     } catch (error) {
       toast({
-        title: "Download failed",
-        description: "Failed to download the video. Please try again.",
+        title: "Échec du téléchargement",
+        description: "Impossible de télécharger la vidéo. Veuillez réessayer.",
         variant: "destructive",
       });
     } finally {
@@ -126,17 +186,17 @@ export function VideoPreview({ jobId }: VideoPreviewProps) {
 
   if (loading) {
     return (
-      <div className="aspect-[9/16] max-w-xs mx-auto bg-black/20 rounded-lg flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
+      <div className="aspect-[9/16] max-w-xs mx-auto bg-muted/30 rounded-2xl flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
 
   if (!jobData || jobData.status === 'FAILED') {
     return (
-      <Alert className="border-red-500/50 bg-red-500/10">
-        <AlertDescription className="text-red-400">
-          Unable to load video preview. Please try creating new content.
+      <Alert className="border-destructive/50 bg-destructive/10">
+        <AlertDescription className="text-destructive">
+          Impossible de charger la prévisualisation. Veuillez créer un nouveau contenu.
         </AlertDescription>
       </Alert>
     );
@@ -144,122 +204,150 @@ export function VideoPreview({ jobId }: VideoPreviewProps) {
 
   if (jobData.status !== 'COMPLETED' || !jobData.finalVideoUrl) {
     return (
-      <div className="aspect-[9/16] max-w-xs mx-auto bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-lg border-2 border-dashed border-white/20 flex items-center justify-center">
+      <div className="aspect-[9/16] max-w-xs mx-auto bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl border-2 border-dashed border-border flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 text-white/40 mx-auto mb-4 animate-spin" />
-          <p className="text-gray-400">Processing... {jobData.progress}%</p>
+          <Loader2 className="w-12 h-12 text-muted-foreground mx-auto mb-4 animate-spin" />
+          <p className="text-muted-foreground">Traitement... {jobData.progress}%</p>
         </div>
       </div>
     );
   }
 
+  // Get the current video URL (either selected variation or original)
+  const currentVideoUrl = selectedVariationId 
+    ? variations.find(v => v.id === selectedVariationId)?.videoUrl 
+    : jobData.finalVideoUrl;
+
   return (
-    <div className="space-y-4">
-      {/* Video Player avec contrôles améliorés */}
-      <div className="aspect-[9/16] max-w-xs mx-auto relative bg-black rounded-2xl overflow-hidden shadow-2xl ring-2 ring-primary/20">
-        <video
-          ref={videoRef}
-          src={jobData.finalVideoUrl}
-          className="w-full h-full object-cover"
-          loop
-          playsInline
-          muted={isMuted}
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
-          onEnded={() => setIsPlaying(false)}
-          onClick={handlePlayPause}
-        />
-        
-        {/* Bouton Play Central (affiché quand la vidéo est en pause) */}
-        {!isPlaying && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm transition-opacity">
-            <Button
-              size="lg"
-              onClick={handlePlayPause}
-              className="w-20 h-20 rounded-full bg-white/90 hover:bg-white shadow-2xl"
-            >
-              <Play className="w-10 h-10 text-black fill-black ml-1" />
-            </Button>
-          </div>
-        )}
-        
-        {/* Contrôles vidéo en bas */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-4 transition-opacity hover:opacity-100" 
-             style={{ opacity: isPlaying ? 0.7 : 1 }}>
-          <div className="flex items-center justify-center space-x-3">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={handlePlayPause}
-              className="text-white hover:bg-white/20 backdrop-blur-sm"
-            >
-              {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-            </Button>
-            
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={handleRestart}
-              className="text-white hover:bg-white/20 backdrop-blur-sm"
-            >
-              <RotateCcw className="w-5 h-5" />
-            </Button>
-            
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={handleMuteToggle}
-              className="text-white hover:bg-white/20 backdrop-blur-sm"
-            >
-              {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-            </Button>
-          </div>
-        </div>
+    <div className="space-y-6">
+      <Tabs defaultValue="player" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="player">Lecteur</TabsTrigger>
+          <TabsTrigger value="compare">Comparer</TabsTrigger>
+          <TabsTrigger value="variations">Variations ({variations.length})</TabsTrigger>
+        </TabsList>
 
-        {/* Badge Instagram Ready */}
-        <div className="absolute top-4 right-4">
-          <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
-            Instagram Ready
-          </div>
-        </div>
-      </div>
-
-      {/* Informations de la vidéo */}
-      <div className="text-center space-y-3">
-        <div className="inline-flex items-center justify-center space-x-3 text-sm text-muted-foreground bg-muted/50 px-4 py-2 rounded-full">
-          <span className="font-semibold">1080 × 1920</span>
-          <span>•</span>
-          <span>9:16</span>
-          <span>•</span>
-          <span>MP4</span>
-        </div>
-        
-        <p className="text-foreground text-sm">
-          Votre vidéo est optimisée pour Instagram Reels et prête à être publiée !
-        </p>
-      </div>
-
-      {/* Bouton de téléchargement amélioré */}
-      <div className="flex justify-center">
-        <Button
-          onClick={handleDownload}
-          disabled={downloading}
-          size="lg"
-          className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold px-8 shadow-lg shadow-green-500/30"
-        >
-          {downloading ? (
-            <>
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              Téléchargement en cours...
-            </>
-          ) : (
-            <>
-              <Download className="w-5 h-5 mr-2" />
-              Télécharger la vidéo
-            </>
+        <TabsContent value="player" className="space-y-4">
+          {/* Advanced Video Player */}
+          {currentVideoUrl && (
+            <AdvancedVideoPlayer
+              videoUrl={currentVideoUrl}
+              originalImageUrl={jobData.originalImageUrl}
+            />
           )}
-        </Button>
-      </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button
+              onClick={handleDownload}
+              disabled={downloading}
+              size="lg"
+              className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+            >
+              {downloading ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Téléchargement...
+                </>
+              ) : (
+                <>
+                  <Download className="w-5 h-5 mr-2" />
+                  Télécharger
+                </>
+              )}
+            </Button>
+
+            <Button
+              onClick={handleRegenerate}
+              disabled={regenerating}
+              variant="outline"
+              size="lg"
+              className="border-primary/50 hover:bg-primary/10"
+            >
+              {regenerating ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Régénération...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-5 h-5 mr-2" />
+                  Régénérer
+                </>
+              )}
+            </Button>
+
+            <Button
+              onClick={handleGenerateVariations}
+              disabled={generatingVariations}
+              variant="outline"
+              size="lg"
+              className="border-secondary/50 hover:bg-secondary/10"
+            >
+              {generatingVariations ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Génération...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  Générer 3 Variations
+                </>
+              )}
+            </Button>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="compare">
+          {/* Before/After Comparison */}
+          {jobData.originalImageUrl && jobData.finalVideoUrl && (
+            <BeforeAfterComparison
+              beforeImage={jobData.originalImageUrl}
+              afterVideoUrl={jobData.finalVideoUrl}
+            />
+          )}
+        </TabsContent>
+
+        <TabsContent value="variations">
+          {/* Variations Gallery */}
+          {variations.length > 0 ? (
+            <VariationsGallery
+              jobId={jobId}
+              variations={variations}
+              onVariationSelect={setSelectedVariationId}
+              onRegenerateVariations={handleGenerateVariations}
+              regenerating={generatingVariations}
+            />
+          ) : (
+            <div className="text-center py-12 space-y-4">
+              <ImageIcon className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-foreground">Aucune variation</h3>
+              <p className="text-muted-foreground">
+                Générez des variations pour explorer différentes versions de votre vidéo
+              </p>
+              <Button
+                onClick={handleGenerateVariations}
+                disabled={generatingVariations}
+                size="lg"
+                className="mt-4"
+              >
+                {generatingVariations ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Génération...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-5 h-5 mr-2" />
+                    Générer 3 Variations
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
