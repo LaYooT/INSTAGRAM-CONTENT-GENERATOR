@@ -48,6 +48,7 @@ export async function POST(
       imageUrl: originalJob.transformedImageUrl,
       prompt: originalJob.videoPrompt,
       duration: 5,
+      userId: session.user.id, // Use user's preferred model
     });
 
     // Calculate cost (approximate)

@@ -132,17 +132,19 @@ export async function resizeImageForVideo(imageUrl: string): Promise<string> {
 
 /**
  * Transform an image using AI (image-to-image with Flux)
- * Uses Flux Dev model for high-quality image generation
+ * Uses user-selected model or defaults to Flux Dev
  * Documentation: https://fal.ai/models/fal-ai/flux/dev/image-to-image/api
  */
 export async function transformImageWithAI(
   imageUrl: string,
-  prompt: string
+  prompt: string,
+  modelEndpoint?: string
 ): Promise<string> {
-  console.log('Transforming image with FAL.ai Flux:', { imageUrl, prompt });
+  const model = modelEndpoint || 'fal-ai/flux/dev/image-to-image';
+  console.log('Transforming image with FAL.ai:', { model, imageUrl, prompt });
 
   try {
-    const result = (await fal.subscribe('fal-ai/flux/dev/image-to-image', {
+    const result = (await fal.subscribe(model, {
       input: {
         prompt: prompt,
         image_url: imageUrl,
@@ -195,15 +197,18 @@ export async function transformImageWithAI(
 
 /**
  * Generate animated video from image using AI
- * Uses Luma Dream Machine for video generation
+ * Uses user-selected model or defaults to Luma Dream Machine
  * Documentation: https://fal.ai/models/fal-ai/luma-dream-machine/image-to-video/api
  */
 export async function generateVideoFromImage(
   imageUrl: string,
   prompt: string,
-  duration: number = 5
+  duration: number = 5,
+  modelEndpoint?: string
 ): Promise<string> {
-  console.log('Generating video with FAL.ai Luma:', {
+  const model = modelEndpoint || 'fal-ai/luma-dream-machine/image-to-video';
+  console.log('Generating video with FAL.ai:', {
+    model,
     imageUrl,
     prompt,
     duration,
@@ -222,7 +227,7 @@ export async function generateVideoFromImage(
     
     console.log('Video generation input parameters:', JSON.stringify(input, null, 2));
 
-    const result = (await fal.subscribe('fal-ai/luma-dream-machine/image-to-video', {
+    const result = (await fal.subscribe(model, {
       input,
       logs: true,
       onQueueUpdate: (update) => {

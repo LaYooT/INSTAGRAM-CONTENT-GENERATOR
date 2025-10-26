@@ -56,6 +56,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   contentJobs   ContentJob[]
+  modelPreferences ModelPreferences?
 
   @@map("users")
 }
@@ -123,4 +124,54 @@ enum ProcessingStage {
 enum UserRole {
   ADMIN
   USER
+}
+
+// Préférences de modèles AI par utilisateur
+model ModelPreferences {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Modèles préférés
+  imageModel        String   @default("fal-ai/flux/dev/image-to-image")
+  imageToVideoModel String   @default("fal-ai/luma-dream-machine/image-to-video")
+  
+  // Paramètres d'optimisation
+  prioritizeSpeed   Boolean  @default(false)
+  prioritizeCost    Boolean  @default(false)
+  prioritizeQuality Boolean  @default(true)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("model_preferences")
+}
+
+// Catalogue des modèles AI disponibles
+model ModelCatalog {
+  id            String   @id @default(cuid())
+  endpoint      String   @unique
+  name          String
+  category      String   // "image" ou "video"
+  provider      String   // "fal-ai", "google", "bytedance", etc.
+  
+  // Pricing
+  pricePerUnit  Float
+  priceUnit     String   // "megapixel", "video", "second", etc.
+  
+  // Caractéristiques
+  maxResolution String?
+  hasAudio      Boolean  @default(false)
+  avgSpeed      Int?     // secondes de traitement moyen
+  qualityRating Int      @default(3) // 1-5 étoiles
+  
+  // Metadata
+  description   String?
+  features      Json?
+  isActive      Boolean  @default(true)
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@map("model_catalog")
 }

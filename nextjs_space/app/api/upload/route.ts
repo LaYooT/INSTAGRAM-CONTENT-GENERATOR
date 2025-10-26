@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Start processing asynchronously
-    processJobAsync(job.id, cloudStoragePath, imagePrompt, videoPrompt);
+    processJobAsync(job.id, cloudStoragePath, imagePrompt, videoPrompt, session.user.id);
 
     return NextResponse.json({
       jobId: job.id,
@@ -86,7 +86,8 @@ async function processJobAsync(
   jobId: string,
   originalImageUrl: string,
   imagePrompt: string,
-  videoPrompt: string
+  videoPrompt: string,
+  userId: string
 ) {
   try {
     // Stage 1: Transform Image with AI
@@ -96,6 +97,7 @@ async function processJobAsync(
     const transformedImageUrl = await generateTransformedImage({
       sourceImageUrl: originalImageUrl,
       prompt: imagePrompt,
+      userId, // Use user's preferred model
     });
 
     await updateJob(jobId, "PROCESSING", 40, "TRANSFORM", {
@@ -110,6 +112,7 @@ async function processJobAsync(
       imageUrl: transformedImageUrl,
       prompt: videoPrompt,
       duration: 15,
+      userId, // Use user's preferred model
     });
 
     await updateJob(jobId, "PROCESSING", 80, "ANIMATE", {

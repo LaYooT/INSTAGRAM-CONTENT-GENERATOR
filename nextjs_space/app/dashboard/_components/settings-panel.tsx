@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { LogOut, User, Bell, Palette, DollarSign, ExternalLink, Save, RefreshCw } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { ModelPreferencesPanel } from "./model-preferences-panel";
 
 interface SettingsPanelProps {
   session: Session;
@@ -158,6 +159,9 @@ export function SettingsPanel({ session }: SettingsPanelProps) {
           </p>
         </CardContent>
       </Card>
+
+      {/* Model Preferences */}
+      <ModelPreferencesPanel />
 
       {/* Budget Management */}
       <Card className="glass border-border">

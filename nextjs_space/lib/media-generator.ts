@@ -2,6 +2,7 @@
 /**
  * Media Generator Service
  * Handles AI image transformation and video generation using FAL.ai
+ * Uses user preferences for model selection
  */
 
 import {
@@ -9,36 +10,76 @@ import {
   generateVideoFromImage,
   upscaleImage,
 } from './fal';
+import { prisma } from './db';
 
 interface GenerateImageOptions {
   sourceImageUrl: string;
   prompt: string;
   aspectRatio?: string;
   highQuality?: boolean;
+  userId?: string; // For fetching user preferences
 }
 
 interface GenerateVideoOptions {
   imageUrl: string;
   prompt: string;
   duration?: number;
+  userId?: string; // For fetching user preferences
+}
+
+/**
+ * Get user's preferred models or return defaults
+ */
+async function getUserModels(userId?: string): Promise<{
+  imageModel: string;
+  videoModel: string;
+}> {
+  if (!userId) {
+    return {
+      imageModel: 'fal-ai/flux/dev/image-to-image',
+      videoModel: 'fal-ai/luma-dream-machine/image-to-video'
+    };
+  }
+
+  try {
+    const preferences = await prisma.modelPreferences.findUnique({
+      where: { userId }
+    });
+
+    return {
+      imageModel: preferences?.imageModel || 'fal-ai/flux/dev/image-to-image',
+      videoModel: preferences?.imageToVideoModel || 'fal-ai/luma-dream-machine/image-to-video'
+    };
+  } catch (error) {
+    console.error('Failed to fetch user preferences:', error);
+    return {
+      imageModel: 'fal-ai/flux/dev/image-to-image',
+      videoModel: 'fal-ai/luma-dream-machine/image-to-video'
+    };
+  }
 }
 
 /**
  * Generate a transformed image using AI
- * This uses FAL.ai's Flux Dev model for high-quality image generation
+ * Uses user's preferred model or defaults to Flux Dev
  */
 export async function generateTransformedImage(
   options: GenerateImageOptions
 ): Promise<string> {
-  const { sourceImageUrl, prompt, highQuality = false } = options;
+  const { sourceImageUrl, prompt, highQuality = false, userId } = options;
 
   console.log('Starting image transformation:', {
     sourceImageUrl,
     prompt,
     highQuality,
+    userId,
   });
 
   try {
+    // Get user's preferred models
+    const { imageModel } = await getUserModels(userId);
+    console.log('Using image model:', imageModel);
+
     // Get a signed URL from S3 for FAL.ai to access
     let imageUrl = sourceImageUrl;
     
@@ -58,8 +99,8 @@ export async function generateTransformedImage(
       imageUrl = await upscaleImage(imageUrl);
     }
 
-    // Transform image with AI
-    const transformedUrl = await transformImageWithAI(imageUrl, prompt);
+    // Transform image with AI using user's preferred model
+    const transformedUrl = await transformImageWithAI(imageUrl, prompt, imageModel);
 
     console.log('Image transformation completed:', transformedUrl);
     return transformedUrl;
@@ -75,20 +116,25 @@ export async function generateTransformedImage(
 
 /**
  * Generate an animated video from an image using AI
- * This uses FAL.ai's Luma Dream Machine for video generation
+ * Uses user's preferred model or defaults to Luma Dream Machine
  */
 export async function generateAnimatedVideo(
   options: GenerateVideoOptions
 ): Promise<string> {
-  const { imageUrl, prompt, duration = 5 } = options;
+  const { imageUrl, prompt, duration = 5, userId } = options;
 
   console.log('Starting video generation:', {
     imageUrl,
     prompt,
     duration,
+    userId,
   });
 
   try {
+    // Get user's preferred models
+    const { videoModel } = await getUserModels(userId);
+    console.log('Using video model:', videoModel);
+
     // Get a publicly accessible URL
     let videoSourceUrl = imageUrl;
     
@@ -105,11 +151,12 @@ export async function generateAnimatedVideo(
       videoSourceUrl = imageUrl;
     }
 
-    // Generate video with FAL.ai
+    // Generate video with FAL.ai using user's preferred model
     const videoUrl = await generateVideoFromImage(
       videoSourceUrl,
       prompt,
-      duration
+      duration,
+      videoModel
     );
 
     console.log('Video generation completed:', videoUrl);
