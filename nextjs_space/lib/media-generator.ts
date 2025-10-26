@@ -41,11 +41,15 @@ export async function generateTransformedImage(
   try {
     // Get a signed URL from S3 for FAL.ai to access
     let imageUrl = sourceImageUrl;
-    if (sourceImageUrl.startsWith('uploads/')) {
-      console.log('Generating signed URL from S3...');
+    
+    // If it's an S3 key (doesn't start with http/https), convert to signed URL
+    if (!sourceImageUrl.startsWith('http://') && !sourceImageUrl.startsWith('https://')) {
+      console.log('Generating signed URL from S3 for key:', sourceImageUrl);
       const { downloadFile } = await import('./s3');
       imageUrl = await downloadFile(sourceImageUrl);
       console.log('Signed S3 URL generated:', imageUrl);
+    } else {
+      console.log('Using existing URL:', sourceImageUrl);
     }
 
     // Optional: Upscale for better quality (adds ~$0.001 cost)
@@ -88,21 +92,16 @@ export async function generateAnimatedVideo(
     // Get a publicly accessible URL
     let videoSourceUrl = imageUrl;
     
-    // If it's an S3 key, get a signed URL
-    if (imageUrl.startsWith('uploads/')) {
-      console.log('Generating signed URL from S3...');
+    // Determine if we need to generate a signed URL
+    if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
+      // It's an S3 key, get a signed URL
+      console.log('Generating signed URL from S3 for key:', imageUrl);
       const { downloadFile } = await import('./s3');
       videoSourceUrl = await downloadFile(imageUrl);
       console.log('Signed S3 URL generated:', videoSourceUrl);
-    }
-    // If it's already a FAL.ai URL (from previous transformation), use it directly
-    else if (imageUrl.startsWith('https://fal.media') || imageUrl.startsWith('https://v3.fal.media') || imageUrl.startsWith('https://v3b.fal.media')) {
-      console.log('Using FAL.ai URL directly:', imageUrl);
-      videoSourceUrl = imageUrl;
-    }
-    // If it's any other HTTPS URL, use it directly (FAL.ai can access public URLs)
-    else if (imageUrl.startsWith('https://')) {
-      console.log('Using public URL directly:', imageUrl);
+    } else {
+      // It's already a public URL (FAL.ai, S3 signed URL, or any other public URL)
+      console.log('Using existing public URL:', imageUrl);
       videoSourceUrl = imageUrl;
     }
 
