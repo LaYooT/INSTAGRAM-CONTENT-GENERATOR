@@ -50,12 +50,9 @@ export async function transformImageWithAI(
       input: {
         prompt: prompt,
         image_url: imageUrl,
-        image_size: {
-          width: 1080,
-          height: 1920
-        },
-        num_inference_steps: 28,
-        guidance_scale: 3.5,
+        strength: 0.8, // Controls transformation intensity (0.1 = minimal, 1.0 = maximum)
+        num_inference_steps: 40, // Number of denoising steps for quality
+        guidance_scale: 3.5, // Adherence to the prompt
         num_images: 1,
         enable_safety_checker: true,
         output_format: 'jpeg',
@@ -155,14 +152,11 @@ export async function upscaleImage(imageUrl: string): Promise<string> {
   try {
     initializeFalClient();
 
-    const result = (await fal.subscribe('fal-ai/flux-pro', {
+    const result = (await fal.subscribe('fal-ai/flux-pro/v1.1/image-to-image', {
       input: {
         prompt: 'high quality, detailed, sharp, professional photography',
         image_url: imageUrl,
-        image_size: {
-          width: 1080,
-          height: 1920
-        },
+        strength: 0.5, // Lower strength to preserve more of the original
         num_inference_steps: 50,
         guidance_scale: 4.0,
         num_images: 1,
