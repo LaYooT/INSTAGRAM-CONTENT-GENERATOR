@@ -6,9 +6,8 @@ import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
-import { LogOut, User, Bell, Palette, DollarSign, ExternalLink, Save, RefreshCw } from "lucide-react";
+import { LogOut, User, Palette, DollarSign, ExternalLink, Save, RefreshCw } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { ModelPreferencesPanel } from "./model-preferences-panel";
@@ -18,8 +17,6 @@ interface SettingsPanelProps {
 }
 
 export function SettingsPanel({ session }: SettingsPanelProps) {
-  const [notifications, setNotifications] = useState(true);
-  const [autoSave, setAutoSave] = useState(true);
   const [budgetInput, setBudgetInput] = useState("");
   const [budgetInfo, setBudgetInfo] = useState<{
     manualBudget: number | null;
@@ -109,39 +106,6 @@ export function SettingsPanel({ session }: SettingsPanelProps) {
             </div>
           </div>
         </CardHeader>
-      </Card>
-
-      {/* Notifications */}
-      <Card className="glass border-border">
-        <CardHeader>
-          <div className="flex items-center gap-fluid-sm">
-            <Bell className="w-5 h-5 text-primary" />
-            <CardTitle className="text-fluid-base">Notifications</CardTitle>
-          </div>
-          <CardDescription className="text-fluid-xs">Manage how you receive notifications</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-fluid-md">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="notifications" className="cursor-pointer text-fluid-sm">
-              Push notifications
-            </Label>
-            <Switch
-              id="notifications"
-              checked={notifications}
-              onCheckedChange={setNotifications}
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <Label htmlFor="autoSave" className="cursor-pointer text-fluid-sm">
-              Auto-save drafts
-            </Label>
-            <Switch
-              id="autoSave"
-              checked={autoSave}
-              onCheckedChange={setAutoSave}
-            />
-          </div>
-        </CardContent>
       </Card>
 
       {/* Appearance */}

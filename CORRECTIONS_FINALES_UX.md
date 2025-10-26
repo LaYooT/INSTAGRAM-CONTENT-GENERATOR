@@ -1,236 +1,236 @@
-# 🎯 Corrections Finales - UX & Fonctionnalités Mobile/Desktop
+# ✅ Corrections UX Appliquées - Octobre 2025
 
-**Date**: 26 octobre 2025  
-**Version**: 2.0 - Production Ready
+## 📊 Résumé des Modifications
 
-## ✅ Problèmes Corrigés
-
-### 1. 🔍 Icône "Œil" dans l'Historique
-**Problème**: L'icône œil dans l'historique ne permettait pas de visualiser les vidéos.
-
-**Solution Implémentée**:
-- Modification de `content-generator.tsx` pour ajouter une fonction `handleJobSelect` qui :
-  - Sélectionne le job
-  - Change automatiquement l'onglet vers "create" 
-  - Affiche la prévisualisation vidéo
-- Connexion de cette fonction à `JobHistory` via props
-
-**Impact**: Les utilisateurs peuvent maintenant cliquer sur l'œil et voir immédiatement la vidéo dans le lecteur principal.
+Suite à l'audit de la page profil, toutes les corrections critiques ont été appliquées en respectant le **design system mobile-first responsive fluid**.
 
 ---
 
-### 2. 📱 Visualisation des 3 Variantes
-**Problème**: Les variantes n'étaient pas facilement accessibles et jouables sur mobile et desktop.
+## 🔧 Fichiers Modifiés
 
-**Solutions Implémentées**:
+### 1. **user-profile.tsx** - Refonte Complète
 
-#### A. Galerie de Variations (`variations-gallery.tsx`)
-- **Interface Responsive**: Grille adaptative 2 cols (mobile) → 3 cols (tablet) → 4 cols (desktop)
-- **Lecture Interactive**:
-  - Desktop: Preview au survol
-  - Mobile: Clic pour lire/pause directement dans la galerie
-  - Indicateur visuel de la variation sélectionnée
-- **Boutons d'Action Optimisés**:
-  - Icônes favorites (étoile)
-  - Téléchargement individuel
-  - Tailles adaptatives (7x7 mobile, 8x8 desktop)
-- **Instructions Contextuelles**: Message d'aide adapté mobile/desktop
+#### ✅ Corrections Appliquées
 
-#### B. Lecteur Vidéo (`video-preview.tsx`)
-- **Tabs Améliorés**: Labels abrégés sur mobile ("Var." au lieu de "Variations")
-- **Navigation Fluide**: Changement de variation met à jour le lecteur principal
-- **Before/After**: Comparaison fonctionne avec la variation sélectionnée
+**A. Système de Budget Synchronisé**
+- ❌ **AVANT** : Budget codé en dur (`INITIAL_BUDGET = 20.0`)
+- ✅ **APRÈS** : Intégration complète de l'API `/api/budget`
 
----
+```typescript
+// AVANT
+const INITIAL_BUDGET = 20.0;
+const budgetLeft = INITIAL_BUDGET - stats.totalCost;
 
-### 3. 📐 Responsive Mobile-First Parfait
+// APRÈS
+const [budgetInfo, setBudgetInfo] = useState<BudgetInfo | null>(null);
 
-#### A. Historique (`job-history.tsx`)
-```css
-Classes Fluid Utilisées:
-- text-fluid-xl, text-fluid-sm, text-fluid-xs
-- gap-fluid-sm, p-fluid-sm
-- mb-fluid-xs, mt-fluid-xs
-- rounded-fluid-lg, rounded-fluid-md
+const fetchBudget = async () => {
+  const response = await fetch('/api/budget');
+  if (response.ok) {
+    const data = await response.json();
+    setBudgetInfo(data);
+  }
+};
 ```
 
-**Améliorations**:
-- Vignettes: 12x12 (mobile) → 16x16 (desktop)
-- Boutons actions: Colonne verticale (mobile) → Ligne horizontale (desktop)
-- Traduction française avec `date-fns/locale/fr`
-- Animations de hover optimisées
+**B. Tokens Fluides Appliqués Partout**
+- ❌ **AVANT** : Classes fixes (`text-3xl`, `text-2xl`, `gap-4`, `space-y-6`)
+- ✅ **APRÈS** : Tokens fluides (`text-fluid-2xl`, `text-fluid-xl`, `gap-fluid-md`, `space-y-fluid-lg`)
 
-#### B. Lecteur Vidéo Avancé (`advanced-video-player.tsx`)
-```css
-Optimisations Mobile:
-- Bouton central play: 16x16 (mobile) → 20x20 (desktop)
-- Contrôles: padding 2 (mobile) → 4 (desktop)
-- Icônes: 4x4 (mobile) → 5x5 (desktop)
-- Boutons: 8x8 (mobile) → 9x9 (desktop)
+| Élément | Avant | Après |
+|---------|-------|-------|
+| Titre page | `text-3xl` | `text-fluid-2xl` |
+| Sous-titre | `text-base` | `text-fluid-sm` |
+| Nom utilisateur | `text-2xl` | `text-fluid-xl` |
+| Email | `text-base` | `text-fluid-sm` |
+| Stats chiffres | `text-3xl` | `text-fluid-2xl sm:text-fluid-3xl` |
+| Espacement | `space-y-6` | `space-y-fluid-lg` |
+| Gaps | `gap-4` | `gap-fluid-md` |
+
+**C. Traduction Complète en Anglais**
+
+| Avant (Français) | Après (Anglais) |
+|------------------|-----------------|
+| "Budget & Consommation" | "Budget & Usage" |
+| "Suivi de vos dépenses réelles en temps réel" | "Real-time spending tracker" |
+| "Budget Initial" | "Total Budget" |
+| "Budget Restant" | "Remaining" |
+| "Consommé" | "Spent (Estimated)" |
+| "Coût moyen par vidéo" | "Avg. Cost per Video" |
+| "Vidéos Créées" | "Videos Created" |
+| "Complétées" | "Completed" |
+| "Taux de Succès" | "Success Rate" |
+
+**D. Améliorations UX**
+- ✅ Auto-refresh toutes les 30 secondes
+- ✅ États de chargement séparés (stats + budget)
+- ✅ Message informatif si aucun budget configuré
+- ✅ Avertissement dynamique budget faible (< 25%)
+- ✅ Calcul précis du pourcentage d'utilisation
+- ✅ Indicateurs visuels responsive (loading spinners)
+
+---
+
+### 2. **settings-panel.tsx** - Nettoyage
+
+#### ✅ Corrections Appliquées
+
+**A. Suppression des Fonctionnalités Non-Connectées**
+- ❌ **AVANT** : Switches "Notifications" et "Auto-save" (non fonctionnels)
+- ✅ **APRÈS** : Section complète retirée
+
+```typescript
+// SUPPRIMÉ :
+const [notifications, setNotifications] = useState(true);
+const [autoSave, setAutoSave] = useState(true);
+
+// Section Notifications Card - RETIRÉE COMPLÈTEMENT
 ```
 
-**Fonctionnalités Adaptatives**:
-- Skip buttons: Cachés sur très petit mobile (< 475px)
-- Volume slider: Visible seulement sur tablette+ (md:)
-- Playback speed: Caché sur très petit mobile
-- Keyboard shortcuts hint: Desktop uniquement
-- Badges info: Texte condensé sur mobile
-
-#### C. Comparaison Avant/Après (`before-after-comparison.tsx`)
-- **Slider Handle**: 6x6 (mobile) → 8x8 (desktop)
-- **Badges**: Espacement adaptatif
-- **Instructions**: Message d'aide contextuel
+**B. Imports Nettoyés**
+- Retrait de `Bell` (icon non utilisée)
+- Retrait de `Switch` (composant non utilisé)
 
 ---
 
-## 🎨 Design System Fluid Appliqué
+## 🎨 Respect du Design System
 
-### Espacement
-```css
-gap-fluid-xs     /* 0.5rem → 0.75rem */
-gap-fluid-sm     /* 0.75rem → 1rem */
-gap-fluid-md     /* 1rem → 1.5rem */
-p-fluid-sm       /* Padding adaptatif */
+### Tokens Fluides Utilisés
+
+#### Typography
+```typescript
+text-fluid-xs    // Petits textes (labels, descriptions)
+text-fluid-sm    // Textes secondaires
+text-fluid-base  // Texte standard
+text-fluid-lg    // Titres de cartes
+text-fluid-xl    // Grands titres
+text-fluid-2xl   // Titres de page
+text-fluid-3xl   // Statistiques (desktop)
 ```
 
-### Typographie
-```css
-text-fluid-xs    /* 0.75rem → 0.875rem */
-text-fluid-sm    /* 0.875rem → 1rem */
-text-fluid-lg    /* 1.125rem → 1.5rem */
-text-fluid-xl    /* 1.25rem → 2rem */
+#### Spacing
+```typescript
+space-y-fluid-xs   // Espacement minimal
+space-y-fluid-sm   // Espacement petit
+space-y-fluid-md   // Espacement moyen
+space-y-fluid-lg   // Espacement grand (sections)
+gap-fluid-xs       // Gap minimal
+gap-fluid-md       // Gap moyen
 ```
 
-### Bordures
-```css
-rounded-fluid-md /* 0.5rem → 0.75rem */
-rounded-fluid-lg /* 0.75rem → 1rem */
+#### Line Heights
+```typescript
+leading-fluid-tight    // Titres serrés
+leading-fluid-normal   // Texte normal
+```
+
+#### Border Radius
+```typescript
+rounded-fluid-md   // Border radius moyen
 ```
 
 ---
 
-## 🎯 Flux Utilisateur Amélioré
+## 📱 Mobile-First Approach
 
-### Scénario 1: Consultation de l'Historique
-1. Utilisateur va dans l'onglet "Historique"
-2. Voit la liste des jobs avec vignettes
-3. **Clique sur l'icône œil** ➜ Bascule automatiquement vers "Create"
-4. Vidéo s'affiche dans le lecteur principal
-5. Peut voir les 3 variantes dans l'onglet dédié
+### Breakpoints Utilisés
+```typescript
+// Mobile par défaut, puis responsive
+text-fluid-xl sm:text-fluid-2xl    // Plus grand sur desktop
+text-fluid-2xl sm:text-fluid-3xl   // Stats grandissent sur desktop
+gap-fluid-md sm:gap-fluid-lg       // Gap augmente sur desktop
+```
 
-### Scénario 2: Lecture des Variantes
-1. Utilisateur génère 3 variantes
-2. Va dans l'onglet "Variations"
-3. **Desktop**: Survol pour prévisualiser, clic pour sélectionner
-4. **Mobile**: Clic sur miniature pour lire en place, re-clic sur le player principal
-5. Variation sélectionnée s'affiche dans l'onglet "Lecteur"
-6. Peut télécharger individuellement ou marquer comme favori
-
-### Scénario 3: Comparaison Avant/Après
-1. Sélectionne une variation (ou vidéo originale)
-2. Va dans l'onglet "Comparer"
-3. Glisse le slider pour comparer
-4. Fonctionne avec la variation sélectionnée
+### Grid Responsive
+```typescript
+// Stats grid - 1 colonne mobile, 3 colonnes desktop
+grid-cols-1 sm:grid-cols-3
+```
 
 ---
 
-## 📱 Tests de Compatibilité
+## ✨ Bénéfices des Corrections
 
-### Breakpoints Testés
-- ✅ **Mobile Small** (320px-474px): UI condensée, boutons essentiels
-- ✅ **Mobile** (475px-639px): Interface optimisée, icônes visible
-- ✅ **Tablet** (640px-767px): Disposition améliorée
-- ✅ **Desktop** (768px+): Toutes les fonctionnalités visibles
+### 1. Cohérence Budgétaire
+- ✅ Le profil et les settings affichent maintenant **la même information**
+- ✅ Budget synchronisé en temps réel via l'API
+- ✅ L'utilisateur peut définir son budget dans settings et le voir dans profil
 
-### Navigateurs
-- ✅ Chrome/Edge (Desktop & Mobile)
-- ✅ Safari (iOS & macOS)
-- ✅ Firefox
-- ✅ Samsung Internet
+### 2. Fluidité Responsive Parfaite
+- ✅ Adaptation fluide de 320px à 1920px+ grâce à `clamp()`
+- ✅ Pas de breakpoints brutaux, tout est fluide
+- ✅ Meilleure lisibilité sur tous les appareils
 
-### Fonctionnalités Vérifiées
-- ✅ Upload photo → Génération vidéo
-- ✅ Lecture vidéo avec contrôles complets
-- ✅ Génération de 3 variantes
-- ✅ Sélection et lecture de variantes
-- ✅ Téléchargement (original + variantes)
-- ✅ Comparaison avant/après
-- ✅ Navigation historique avec visualisation
-- ✅ Budget tracker
-- ✅ Responsive sur tous écrans
+### 3. Interface Professionnelle
+- ✅ 100% en anglais (standard international)
+- ✅ Pas de fonctionnalités trompeuses
+- ✅ UX claire et honnête
+
+### 4. Performance & Maintenabilité
+- ✅ Code plus propre (imports optimisés)
+- ✅ États de chargement appropriés
+- ✅ Auto-refresh intelligent (30s)
 
 ---
 
-## 🚀 Améliorations Techniques
+## 🧪 Tests à Effectuer
 
-### Performance
-- **Lazy loading** des vidéos dans la galerie
-- **Optimisation** des animations avec `framer-motion`
-- **Polling intelligent** pour les updates de progression
+### Tests Fonctionnels
+- [ ] Le budget affiché dans Profile correspond à celui dans Settings
+- [ ] La modification du budget dans Settings met à jour Profile
+- [ ] L'auto-refresh fonctionne (30 secondes)
+- [ ] Les états de chargement s'affichent correctement
+- [ ] L'avertissement budget faible apparaît quand < 25%
 
-### Accessibilité
-- Labels ARIA appropriés
-- Touches clavier fonctionnelles (Space, F, M, J, L)
-- Contrastes respectés (WCAG AA)
-- Focus visible sur navigation clavier
+### Tests Responsive
+- [ ] Mobile (320px - 480px) : Tout lisible et fluide
+- [ ] Tablet (768px - 1024px) : Grille de stats 3 colonnes
+- [ ] Desktop (1280px+) : Textes plus grands, spacing optimal
 
-### UX/UI
-- Feedback visuel immédiat
-- États de chargement clairs
-- Animations fluides et naturelles
-- Messages d'aide contextuels
-
----
-
-## 📊 Métriques d'Amélioration
-
-| Métrique | Avant | Après | Amélioration |
-|----------|-------|-------|--------------|
-| Boutons cliquables mobile | 75% | 100% | +25% |
-| Variantes accessibles | Difficile | Facile | ++++ |
-| Responsive breakpoints | 2 | 4+ | +100% |
-| Temps pour voir une vidéo de l'historique | 3 clics | 1 clic | -66% |
-| UX Mobile Score | 6/10 | 9.5/10 | +58% |
+### Tests Visuels
+- [ ] Tous les textes en anglais
+- [ ] Tokens fluides appliqués partout
+- [ ] Pas de sauts de mise en page (hydration)
+- [ ] Animations smooth (progress bars, spinners)
 
 ---
 
-## 🎓 Bonnes Pratiques Appliquées
+## 📋 Checklist de Validation
 
-1. **Mobile-First Approach**: Tous les composants conçus d'abord pour mobile
-2. **Fluid Design**: Utilisation systématique du système de tokens fluides
-3. **Progressive Enhancement**: Fonctionnalités enrichies sur grands écrans
-4. **Touch-Friendly**: Zones de touch de 44x44px minimum
-5. **Performance**: Lazy loading et optimisations d'images/vidéos
-6. **Accessibility**: Support clavier et labels appropriés
-
----
-
-## 📝 Notes pour le Développement Futur
-
-### Extensions Possibles
-- [ ] Gestures touch (swipe, pinch-to-zoom)
-- [ ] PWA avec mode offline
-- [ ] Partage direct vers Instagram
-- [ ] Prévisualisation en temps réel lors de l'édition
-- [ ] Favoris synchronisés multi-devices
-
-### Maintenance
-- ✅ Code propre et documenté
-- ✅ Composants réutilisables
-- ✅ Design system cohérent
-- ✅ Tests de non-régression facilités
+- [x] Budget synchronisé entre profil et settings ✅
+- [x] Tokens fluid appliqués partout ✅
+- [x] Interface 100% en anglais ✅
+- [x] Switches notifications/auto-save retirés ✅
+- [x] Code nettoyé (imports, états inutiles) ✅
+- [x] Design system respecté ✅
+- [x] Mobile-first approach ✅
+- [ ] Tests build réussis (à venir)
+- [ ] Tests runtime réussis (à venir)
 
 ---
 
-## 🎉 Résultat Final
+## 🚀 Prochaines Étapes
 
-L'application est maintenant **100% fonctionnelle** sur mobile et desktop avec:
-- ✅ Toutes les fonctionnalités opérationnelles
-- ✅ Icône œil fonctionnelle
-- ✅ Lecture des 3 variantes fluide
-- ✅ Design responsive parfait
-- ✅ UX optimale mobile-first
-- ✅ Performance optimale
+1. **Build & Test** → Vérifier que tout compile
+2. **Test manuel** → Tester sur différentes tailles d'écran
+3. **Checkpoint** → Sauvegarder l'état stable
+4. **(Optionnel) Phase 2** → Animations avancées, tooltips
 
-**L'application est prête pour la production ! 🚀**
+---
 
+## 📊 Impact des Modifications
+
+| Métrique | Avant | Après |
+|----------|-------|-------|
+| **Budget** | 🔴 Incohérent (codé en dur) | 🟢 Synchronisé API |
+| **Responsive** | 🟡 Classes fixes | 🟢 Tokens fluid avec clamp() |
+| **Langue** | 🔴 Français/Anglais mélangés | 🟢 100% Anglais |
+| **Fonctionnalités** | 🔴 Switches trompeurs | 🟢 Pas de fausses promesses |
+| **UX Loading** | 🔴 Pas d'indicateurs | 🟢 Loading states appropriés |
+| **Code Quality** | 🟡 Imports inutiles | 🟢 Code nettoyé |
+
+---
+
+**Date des corrections :** 26 octobre 2025  
+**Statut :** ✅ Toutes les corrections critiques appliquées  
+**Prochaine étape :** Build & Test
