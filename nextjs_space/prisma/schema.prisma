@@ -49,6 +49,7 @@ model User {
   isApproved    Boolean   @default(false)
   approvedAt    DateTime?
   approvedBy    String?
+  manualBudget  Float?    // Budget manually set by user from fal.ai dashboard
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

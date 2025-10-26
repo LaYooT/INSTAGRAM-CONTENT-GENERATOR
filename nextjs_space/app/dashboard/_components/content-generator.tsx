@@ -22,9 +22,11 @@ export function ContentGenerator({ session }: ContentGeneratorProps) {
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [activeTab, setActiveTab] = useState<"create" | "history" | "settings" | "profile" | "admin">("create");
-  const [budgetInfo, setBudgetInfo] = useState({ spent: 0, remaining: 20.0 });
-
-  const INITIAL_BUDGET = 20.0;
+  const [budgetInfo, setBudgetInfo] = useState<{
+    spent: number;
+    remaining: number | null;
+    hasManualBudget: boolean;
+  }>({ spent: 0, remaining: null, hasManualBudget: false });
 
   // Handle job selection from history - switch to create tab and show preview
   const handleJobSelect = (jobId: string) => {
@@ -36,13 +38,13 @@ export function ContentGenerator({ session }: ContentGeneratorProps) {
   useEffect(() => {
     const fetchBudget = async () => {
       try {
-        const response = await fetch('/api/jobs');
+        const response = await fetch('/api/budget');
         if (response.ok) {
-          const jobs = await response.json();
-          const totalCost = jobs.reduce((sum: number, j: any) => sum + (j.cost || 0), 0);
+          const data = await response.json();
           setBudgetInfo({
-            spent: totalCost,
-            remaining: INITIAL_BUDGET - totalCost,
+            spent: data.spent,
+            remaining: data.remaining,
+            hasManualBudget: data.hasManualBudget
           });
         }
       } catch (error) {
@@ -92,17 +94,18 @@ export function ContentGenerator({ session }: ContentGeneratorProps) {
                   {session.user?.name || "User"}
                 </p>
                 <p className="text-fluid-xs text-muted-foreground leading-fluid-tight">
-                  Budget: <span className={`font-semibold ${
-                    budgetInfo.remaining > 10 ? 'text-green-500' : 
-                    budgetInfo.remaining > 5 ? 'text-yellow-500' : 
-                    'text-red-500'
-                  }`}>
-                    €{budgetInfo.remaining.toFixed(2)}
-                  </span>
-                  {budgetInfo.spent > 0 && (
-                    <span className="text-muted-foreground ml-1">
-                      / €{INITIAL_BUDGET.toFixed(2)}
-                    </span>
+                  {budgetInfo.hasManualBudget && budgetInfo.remaining !== null ? (
+                    <>
+                      Budget: <span className={`font-semibold ${
+                        budgetInfo.remaining > (budgetInfo.remaining + budgetInfo.spent) * 0.5 ? 'text-green-500' : 
+                        budgetInfo.remaining > (budgetInfo.remaining + budgetInfo.spent) * 0.25 ? 'text-yellow-500' : 
+                        'text-red-500'
+                      }`}>
+                        €{budgetInfo.remaining.toFixed(2)}
+                      </span>
+                    </>
+                  ) : (
+                    <>Spent: <span className="font-semibold text-foreground">€{budgetInfo.spent.toFixed(2)}</span></>
                   )}
                 </p>
               </div>
