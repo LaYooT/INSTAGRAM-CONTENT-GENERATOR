@@ -411,3 +411,38 @@ Modifiable dans `lib/fal.ts`
 ---
 
 **Made with ❤️ using FAL.ai, Next.js, and Abacus.AI**
+
+---
+
+## 🔧 Corrections Techniques Récentes
+
+### Migration vers @fal-ai/client (Dernière Mise à Jour)
+
+**Problème identifié et résolu :**
+L'erreur `422 Unprocessable Entity` était causée par l'utilisation du package déprécié `@fal-ai/serverless-client` et des URLs S3 signées qui n'étaient pas accessibles par FAL.ai.
+
+**Solutions implémentées :**
+
+1. ✅ **Migration SDK** : Remplacement de `@fal-ai/serverless-client` par `@fal-ai/client` (dernière version)
+2. ✅ **Intégration FAL.ai Storage** : 
+   - Les images sont téléchargées depuis S3 en tant que Buffer
+   - Converties en Blob et uploadées vers le stockage FAL.ai
+   - Les URLs FAL.ai sont utilisées pour toutes les transformations AI
+3. ✅ **Paramètres API corrects** :
+   - Suppression du paramètre `image_size` non supporté
+   - Ajout du paramètre `strength` pour contrôler l'intensité
+   - Correction du format pour `luma-dream-machine`
+
+**Flux technique :**
+```
+Utilisateur upload → S3 Storage → Download as Buffer → 
+Upload to FAL.ai Storage → FAL.ai URL → AI Transformation → 
+Result URL → Database
+```
+
+**Tests effectués :**
+- ✅ Text-to-image avec Flux Dev
+- ✅ Image-to-image avec Flux Dev
+- ✅ Upload vers FAL.ai storage
+- ✅ Build et compilation réussis
+

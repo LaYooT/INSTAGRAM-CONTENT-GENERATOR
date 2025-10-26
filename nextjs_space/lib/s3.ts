@@ -29,6 +29,27 @@ export async function downloadFile(key: string): Promise<string> {
   return getSignedUrl(s3Client, command, { expiresIn: 3600 });
 }
 
+export async function downloadFileAsBuffer(key: string): Promise<Buffer> {
+  const command = new GetObjectCommand({
+    Bucket: bucketName,
+    Key: key,
+  });
+
+  const response = await s3Client.send(command);
+  
+  if (!response.Body) {
+    throw new Error(`No data returned for key: ${key}`);
+  }
+
+  // Convert stream to buffer
+  const chunks: Uint8Array[] = [];
+  for await (const chunk of response.Body as any) {
+    chunks.push(chunk);
+  }
+  
+  return Buffer.concat(chunks);
+}
+
 export async function deleteFile(key: string): Promise<void> {
   const command = new DeleteObjectCommand({
     Bucket: bucketName,

@@ -8,8 +8,9 @@ import {
   transformImageWithAI,
   generateVideoFromImage,
   upscaleImage,
+  uploadToFalStorage,
 } from './fal';
-import { downloadFile } from './s3';
+import { downloadFileAsBuffer } from './s3';
 
 interface GenerateImageOptions {
   sourceImageUrl: string;
@@ -40,10 +41,14 @@ export async function generateTransformedImage(
   });
 
   try {
-    // Get signed URL if it's an S3 key
+    // Download image from S3 and upload to FAL.ai storage
     let imageUrl = sourceImageUrl;
     if (sourceImageUrl.startsWith('uploads/')) {
-      imageUrl = await downloadFile(sourceImageUrl);
+      console.log('Downloading image from S3...');
+      const imageBuffer = await downloadFileAsBuffer(sourceImageUrl);
+      console.log('Uploading to FAL.ai storage...');
+      imageUrl = await uploadToFalStorage(imageBuffer);
+      console.log('FAL.ai URL:', imageUrl);
     }
 
     // Optional: Upscale for better quality (adds ~$0.001 cost)
@@ -83,13 +88,28 @@ export async function generateAnimatedVideo(
   });
 
   try {
-    // Ensure we have a valid URL
+    // Ensure we have a FAL.ai compatible URL
     let videoSourceUrl = imageUrl;
+    
+    // If it's an S3 key, download and re-upload to FAL.ai storage
     if (imageUrl.startsWith('uploads/')) {
-      videoSourceUrl = await downloadFile(imageUrl);
+      console.log('Downloading image from S3...');
+      const imageBuffer = await downloadFileAsBuffer(imageUrl);
+      console.log('Uploading to FAL.ai storage...');
+      videoSourceUrl = await uploadToFalStorage(imageBuffer);
+      console.log('FAL.ai URL:', videoSourceUrl);
+    }
+    // If it's already a FAL.ai URL (from previous transformation), use it directly
+    else if (!imageUrl.startsWith('https://')) {
+      // If it's a relative path or unknown format, try to download it
+      console.log('Downloading image from unknown source...');
+      const imageBuffer = await downloadFileAsBuffer(imageUrl);
+      console.log('Uploading to FAL.ai storage...');
+      videoSourceUrl = await uploadToFalStorage(imageBuffer);
+      console.log('FAL.ai URL:', videoSourceUrl);
     }
 
-    // Generate video with Runway ML AI
+    // Generate video with FAL.ai
     const videoUrl = await generateVideoFromImage(
       videoSourceUrl,
       prompt,

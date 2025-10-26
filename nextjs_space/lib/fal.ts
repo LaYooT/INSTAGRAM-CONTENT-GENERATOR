@@ -6,7 +6,7 @@
  * Documentation: https://fal.ai/docs
  */
 
-import * as fal from '@fal-ai/serverless-client';
+import { fal } from '@fal-ai/client';
 
 const FAL_API_KEY = process.env.FAL_API_KEY || '';
 
@@ -31,6 +31,29 @@ function initializeFalClient(): void {
   fal.config({
     credentials: apiKey,
   });
+}
+
+/**
+ * Upload an image buffer to FAL.ai storage
+ * This ensures the image is accessible by FAL.ai APIs
+ */
+export async function uploadToFalStorage(imageBuffer: Buffer): Promise<string> {
+  initializeFalClient();
+  
+  try {
+    // Convert Buffer to Blob for FAL.ai
+    const blob = new Blob([imageBuffer], { type: 'image/jpeg' });
+    const url = await fal.storage.upload(blob);
+    console.log('Image uploaded to FAL.ai storage:', url);
+    return url;
+  } catch (error) {
+    console.error('Failed to upload to FAL.ai storage:', error);
+    throw new Error(
+      `Failed to upload to FAL.ai storage: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`
+    );
+  }
 }
 
 /**
@@ -106,12 +129,7 @@ export async function generateVideoFromImage(
     const result = (await fal.subscribe('fal-ai/luma-dream-machine/image-to-video', {
       input: {
         prompt: prompt,
-        keyframes: {
-          frame0: {
-            type: 'image',
-            url: imageUrl
-          }
-        },
+        image_url: imageUrl,
         aspect_ratio: '9:16', // Instagram Reels format
         loop: false,
       },
