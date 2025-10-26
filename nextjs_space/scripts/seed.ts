@@ -33,12 +33,16 @@ async function main() {
   console.log("   Email: admin@reelgen.ai");
   console.log("   Password: Admin123!@#");
 
-  // Create default test user (requires approval)
+  // Create default test user (pre-approved for testing)
   const hashedPassword = await bcryptjs.hash("johndoe123", 12);
   
   const testUser = await prisma.user.upsert({
     where: { email: "john@doe.com" },
-    update: {},
+    update: {
+      isApproved: true,
+      approvedAt: new Date(),
+      approvedBy: adminUser.id,
+    },
     create: {
       email: "john@doe.com",
       password: hashedPassword,
@@ -46,12 +50,14 @@ async function main() {
       lastName: "Doe",
       name: "John Doe",
       role: "USER",
-      isApproved: false, // Requires admin approval
+      isApproved: true, // Pre-approved for testing
+      approvedAt: new Date(),
+      approvedBy: adminUser.id,
     },
   });
 
-  console.log("✅ Created test user:", testUser.email, "(Requires approval)");
-  console.log("\n🔒 Security enabled: New users require admin approval");
+  console.log("✅ Created test user:", testUser.email, "(Pre-approved)");
+  console.log("\n🔒 Security enabled: New signups require admin approval");
   console.log("Database seeding completed.");
 }
 
