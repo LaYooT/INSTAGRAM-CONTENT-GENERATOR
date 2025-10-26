@@ -8,6 +8,7 @@
  */
 
 import { fal } from '@fal-ai/client';
+import { prisma } from './db';
 import sharp from 'sharp';
 
 const FAL_API_KEY = process.env.FAL_API_KEY || '';
