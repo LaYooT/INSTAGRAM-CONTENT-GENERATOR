@@ -134,13 +134,17 @@ export async function generateVideoFromImage(
   try {
     initializeFalClient();
 
+    const input = {
+      prompt: prompt,
+      image_url: imageUrl,
+      aspect_ratio: '9:16' as '9:16', // Instagram Reels format
+      loop: false,
+    };
+    
+    console.log('Video generation input parameters:', JSON.stringify(input, null, 2));
+
     const result = (await fal.subscribe('fal-ai/luma-dream-machine/image-to-video', {
-      input: {
-        prompt: prompt,
-        image_url: imageUrl,
-        aspect_ratio: '9:16', // Instagram Reels format
-        loop: false,
-      },
+      input,
       logs: true,
       onQueueUpdate: (update) => {
         if (update.status === 'IN_PROGRESS') {
@@ -163,6 +167,15 @@ export async function generateVideoFromImage(
     return videoUrl;
   } catch (error) {
     console.error('FAL.ai video generation error:', error);
+    
+    // Log detailed error information
+    if (error && typeof error === 'object') {
+      console.error('Error details:', JSON.stringify(error, null, 2));
+      if ('body' in error) {
+        console.error('Error body:', JSON.stringify((error as any).body, null, 2));
+      }
+    }
+    
     throw new Error(
       `FAL.ai API error: ${error instanceof Error ? error.message : 'Unknown error'}`
     );
