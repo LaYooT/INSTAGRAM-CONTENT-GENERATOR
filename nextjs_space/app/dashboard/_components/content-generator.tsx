@@ -19,6 +19,7 @@ interface ContentGeneratorProps {
 
 export function ContentGenerator({ session }: ContentGeneratorProps) {
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [activeTab, setActiveTab] = useState<"create" | "history" | "settings" | "profile">("create");
   const [budgetInfo, setBudgetInfo] = useState({ spent: 0, remaining: 20.0 });
 
@@ -132,12 +133,15 @@ export function ContentGenerator({ session }: ContentGeneratorProps) {
                       </div>
 
                       <PhotoUpload
-                        onJobCreated={setCurrentJobId}
-                        disabled={!!currentJobId}
+                        onJobCreated={(jobId) => {
+                          setCurrentJobId(jobId);
+                          setIsProcessing(true);
+                        }}
+                        disabled={isProcessing}
                       />
                     </div>
 
-                    {currentJobId && (
+                    {isProcessing && currentJobId && (
                       <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -145,7 +149,7 @@ export function ContentGenerator({ session }: ContentGeneratorProps) {
                       >
                         <ProcessingStatus
                           jobId={currentJobId}
-                          onComplete={() => setCurrentJobId(null)}
+                          onComplete={() => setIsProcessing(false)}
                         />
                       </motion.div>
                     )}
