@@ -58,6 +58,8 @@ model User {
   contentJobs   ContentJob[]
   modelPreferences ModelPreferences?
 
+  @@index([role])
+  @@index([isApproved])
   @@map("users")
 }
 
@@ -90,6 +92,10 @@ model ContentJob {
   user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   variations        JobVariation[]
 
+  @@index([userId])
+  @@index([createdAt])
+  @@index([userId, createdAt])
+  @@index([status])
   @@map("content_jobs")
 }
 
@@ -104,6 +110,8 @@ model JobVariation {
 
   job               ContentJob  @relation(fields: [jobId], references: [id], onDelete: Cascade)
 
+  @@index([jobId])
+  @@index([isFavorite])
   @@map("job_variations")
 }
 

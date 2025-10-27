@@ -330,8 +330,19 @@ export async function upscaleImage(imageUrl: string): Promise<string> {
 }
 
 /**
+ * Fallback pricing constants (used when database is unavailable)
+ * These are approximate values and should be kept in sync with ModelCatalog
+ */
+const FALLBACK_PRICING = {
+  IMAGE_DEFAULT: 0.025, // USD per image (Flux Dev approximate)
+  VIDEO_DEFAULT: 0.05,  // USD per video (Luma Dream Machine approximate)
+} as const;
+
+/**
  * Get model pricing from database
  * Fetches actual pricing from ModelCatalog instead of hardcoded values
+ *
+ * @throws {Error} If database query fails (critical operation)
  */
 async function getModelPricing(endpoint: string): Promise<number> {
   try {
@@ -339,11 +350,26 @@ async function getModelPricing(endpoint: string): Promise<number> {
       where: { endpoint },
       select: { pricePerUnit: true }
     });
-    return model?.pricePerUnit ?? 0;
+
+    if (!model) {
+      console.warn(`⚠️ Model pricing not found in database for: ${endpoint}`);
+      console.warn(`   Using fallback pricing. Please seed ModelCatalog table.`);
+
+      // Return fallback with explicit warning
+      return endpoint.includes('image')
+        ? FALLBACK_PRICING.IMAGE_DEFAULT
+        : FALLBACK_PRICING.VIDEO_DEFAULT;
+    }
+
+    return model.pricePerUnit;
   } catch (error) {
-    console.error(`Failed to fetch pricing for ${endpoint}:`, error);
-    // Fallback to approximate values if DB query fails
-    return endpoint.includes('image') ? 0.025 : 0.05;
+    console.error(`❌ Failed to fetch pricing for ${endpoint}:`, error);
+    console.error(`   Database may be unavailable. Using fallback pricing.`);
+
+    // Return fallback but log error explicitly
+    return endpoint.includes('image')
+      ? FALLBACK_PRICING.IMAGE_DEFAULT
+      : FALLBACK_PRICING.VIDEO_DEFAULT;
   }
 }
 
