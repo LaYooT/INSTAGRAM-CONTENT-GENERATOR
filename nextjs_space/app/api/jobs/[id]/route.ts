@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { deleteFile } from "@/lib/s3";
+import { getBucketConfig } from "@/lib/aws-config";
 
 export const dynamic = "force-dynamic";
 
@@ -59,9 +61,9 @@ export async function DELETE(
     }
 
     const job = await prisma.contentJob.findFirst({
-      where: { 
+      where: {
         id: params.id,
-        userId: session.user.id 
+        userId: session.user.id
       }
     });
 
@@ -69,14 +71,56 @@ export async function DELETE(
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
 
-    // Delete the job
+    // Get folder prefix for S3 file identification
+    const { folderPrefix } = getBucketConfig();
+
+    // Fetch all variations before deletion
+    const variations = await prisma.jobVariation.findMany({
+      where: { jobId: params.id },
+      select: { videoUrl: true, thumbnailUrl: true }
+    });
+
+    // Delete associated files from S3
+    try {
+      // Delete job files
+      if (job.originalImageUrl?.startsWith(folderPrefix || '')) {
+        await deleteFile(job.originalImageUrl);
+        console.log(`Deleted S3 file: ${job.originalImageUrl}`);
+      }
+      if (job.transformedImageUrl?.startsWith(folderPrefix || '')) {
+        await deleteFile(job.transformedImageUrl);
+        console.log(`Deleted S3 file: ${job.transformedImageUrl}`);
+      }
+      if (job.animatedVideoUrl?.startsWith(folderPrefix || '')) {
+        await deleteFile(job.animatedVideoUrl);
+        console.log(`Deleted S3 file: ${job.animatedVideoUrl}`);
+      }
+      if (job.finalVideoUrl?.startsWith(folderPrefix || '')) {
+        await deleteFile(job.finalVideoUrl);
+        console.log(`Deleted S3 file: ${job.finalVideoUrl}`);
+      }
+
+      // Delete variation files
+      for (const variation of variations) {
+        if (variation.videoUrl?.startsWith(folderPrefix || '')) {
+          await deleteFile(variation.videoUrl);
+          console.log(`Deleted S3 variation video: ${variation.videoUrl}`);
+        }
+        if (variation.thumbnailUrl?.startsWith(folderPrefix || '')) {
+          await deleteFile(variation.thumbnailUrl);
+          console.log(`Deleted S3 variation thumbnail: ${variation.thumbnailUrl}`);
+        }
+      }
+    } catch (s3Error) {
+      console.error('Failed to cleanup S3 files:', s3Error);
+      // Continue with DB deletion even if S3 cleanup fails
+      // This prevents orphaned DB records if S3 is unavailable
+    }
+
+    // Delete the job (cascades to variations via Prisma schema)
     await prisma.contentJob.delete({
       where: { id: params.id }
     });
-
-    // In a real app, you would also delete files from S3 here
-    // await deleteFile(job.originalImageUrl);
-    // if (job.finalVideoUrl) await deleteFile(job.finalVideoUrl);
 
     return NextResponse.json({ message: "Job deleted successfully" });
 
